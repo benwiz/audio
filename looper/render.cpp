@@ -1,3 +1,4 @@
+
 #include <Bela.h>
 #include <cmath>
 #include <chrono>
@@ -39,7 +40,7 @@ void analog_fast_blink(BelaContext *context, unsigned int frameNum, unsigned int
   analogWriteOnce(context, frameNum, pin, out);
 
   // Update and wrap phase of sine tone
-  gPhase += 4.0f * (float)M_PI * gFrequency * gInverseSampleRate;
+  gPhase += 4.0f * (float)M_PI * gFrequency * gInverseSampleRate; // TODO definitely should not be sharing a global gPhase
   if (gPhase > M_PI) {
     gPhase -= 2.0f * (float)M_PI;
   }
@@ -51,7 +52,7 @@ void analog_slow_blink(BelaContext *context, unsigned int frameNum, unsigned int
   analogWriteOnce(context, frameNum, pin, out);
 
   // Update and wrap phase of sine tone
-  gPhase += 0.5f * (float)M_PI * gFrequency * gInverseSampleRate;
+  gPhase += 0.5f * (float)M_PI * gFrequency * gInverseSampleRate; // TODO definitely should not be sharing a global gPhase
   if (gPhase > M_PI) {
     gPhase -= 2.0f * (float)M_PI;
   }
@@ -73,20 +74,18 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 // 0 = no click event, 1 = single click, 2 = double click, 3 = long click
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
-  // If old status was not clicked (false) and new status is clicked (true),
-  // then toggle our loop1 status
-  if (oldStatus == false && newStatus == true) {
-    int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    int duration = currTimestamp - oldTimestamp;
+  int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+  int duration = currTimestamp - oldTimestamp;
 
-    // If the duration (delay between clicks) is greater than gButtonPressDelay, then we can count it as a click
-    if (duration > gDebounceDelay) {
+  if (duration > gDebounceDelay) {
+    // If old status was not clicked (false) and new status is clicked (true), then toggle status
+    if (oldStatus == false && newStatus == true) {
       return {1, currTimestamp};
     } else {
-      return {0, 0};
+      return {0, currTimestamp};
     }
   } else {
-    return {0, 0};
+    return {0, currTimestamp};
   }
 }
 
@@ -150,10 +149,10 @@ void render(BelaContext *context, void *userData)
     // button 1 handling
     int button1 = digitalRead(context, 0, gButton1Pin);
     bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
-    struct Click button1Click= click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
+    struct Click button1Click = click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
     gButton1Status = newButton1Status;
     if (button1Click.type > 0) {
-      gBank1Status = (gBank1Status + 1) % 4; // TODO create fn for correct status cycling
+      gBank1Status = (gBank1Status + 1) % 4;
       gButton1PressTimestamp = button1Click.timestamp;
     }
   }
