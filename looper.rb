@@ -91,44 +91,6 @@ end
 ##|               |##
 #####################
 
-##| in_thread do
-##|   live_loop :kick do
-##|     use_real_time
-##|     sync "/osc/trigger/kick"
-##|     kick
-##|   end
-##| end
-
-
-##| in_thread do
-##|   live_loop :start do
-##|     use_real_time
-##|     sync "/osc/trigger/start"
-##|     start_record_audio
-##|   end
-##| end
-
-
-##| in_thread do
-##|   live_loop :stop do
-##|     use_real_time
-##|     sync "/osc/trigger/stop"
-##|     stop_record_audio
-##|   end
-##| end
-
-
-##| in_thread do
-##|   live_loop :play do
-##|     use_real_time
-##|     sync "/osc/trigger/play"
-##|     play_audio
-##|   end
-##| end
-
-# Attempt to use a more data-oriented approach but I'm
-# not sure how to pass around the method.
-
 osc_commands = [
   {message: "/osc/trigger/kick",  fn: method(:kick)},
   {message: "/osc/trigger/start", fn: method(:start_record_audio)},
