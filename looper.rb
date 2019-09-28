@@ -92,27 +92,20 @@ end
 #####################
 
 osc_commands = [
-  {message: "/osc/trigger/kick",  fn: method(:kick)},
-  {message: "/osc/trigger/start", fn: method(:start_record_audio)},
-  {message: "/osc/trigger/stop",  fn: method(:stop_record_audio)},
-  {message: "/osc/trigger/play",  fn: method(:play_audio)},
+  {message: "/osc/trigger/kick",  fn: :kick},
+  {message: "/osc/trigger/start", fn: :start_record_audio},
+  {message: "/osc/trigger/stop",  fn: :stop_record_audio},
+  {message: "/osc/trigger/play",  fn: :play_audio},
 ]
 
 osc_commands.each do |osc_command|
   in_thread do
-    live_loop :stop do
+    live_loop osc_command[:fn] do
       use_real_time
       sync osc_command[:message]
-      osc_command[:fn].()
+      method(osc_command[:fn]).()
     end
   end
 end
-
-
-
-
-
-
-
 
 
