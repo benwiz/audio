@@ -3,9 +3,7 @@
 # someone else's attempt (check the gist):
 # https://in-thread.sonic-pi.net/t/betaversion-of-live-looper-with-touchosc-interface/379/2
 
-# TODO (first): bundle_id.size is not exactly right, maybe a little short
-# TODO (first): Remove the gap between loops
-
+# TODO: osc commands should always be able to be called without breaking
 # TODO: `start` osc command should be able to specify buffer
 # TODO: `pause` osc command should be able to specify buffer (logical branch to modify the buffer's :play boolean)
 # TODO: `play` should automatically pick up new  tracks, calling it again shouldn't do anything
@@ -13,10 +11,9 @@
 # TODO: osc commands should be namespaced better
 # TODO: Output information about the buffers via osc_send
 
-# TODO: Not important, but `buffer_ids` is no longer an accurate name
-# TODO: Minimize access to global variables
-
-# FIXME: There is a minor audible glitch when looping
+# FIXME: There is a minor audible glitch when looping. I'm pretty
+# certain is related to either record function or the microphone
+# hardware I am using, not the playback.
 
 require 'securerandom'
 
@@ -85,12 +82,9 @@ end
 
 
 def stop_record_audio()
-  # Stop audio
-  ##| sync :tick
-  live_audio :live_audio_synth, :stop
-  
-  # Calculate size
+  # Stop audio and calculate size
   size = Time.now.to_f - get(:start_time)
+  live_audio :live_audio_synth, :stop
   size = size.floor(4)
   print size
   
