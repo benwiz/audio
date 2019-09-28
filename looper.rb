@@ -3,18 +3,20 @@
 # someone else's attempt (check the gist):
 # https://in-thread.sonic-pi.net/t/betaversion-of-live-looper-with-touchosc-interface/379/2
 
-# TODO (first): `play` must play on a loop. I probably need to record the length
-# of the actual content and pass that around in the buffer_ids list
+# TODO (first): bundle_id.size is not exactly right, maybe a little short
+# TODO (first): Remove the gap between loops
 
-# TODO: There are state change bugs
 # TODO: `start` osc command should be able to specify buffer
 # TODO: `pause` osc command should be able to specify buffer (logical branch to modify the buffer's :play boolean)
+# TODO: `play` should automatically pick up new  tracks, calling it again shouldn't do anything
 # TODO: new osc commands to control the metronome
 # TODO: osc commands should be namespaced better
 # TODO: Output information about the buffers via osc_send
 
 # TODO: Not important, but `buffer_ids` is no longer an accurate name
 # TODO: Minimize access to global variables
+
+# FIXME: There is a minor audible glitch when looping
 
 require 'securerandom'
 
@@ -26,6 +28,7 @@ require 'securerandom'
 ###############
 
 use_bpm 60
+metronome = false
 
 ##| I need a long buffer because I don't know
 ##| the final length of my recording. I can be
@@ -45,7 +48,8 @@ set :play, true
 
 #################
 ##|           |##
-##| Functions |## # TODO: Make this a better title
+##| Recording |##
+##| Functions |##
 ##|           |##
 #################
 
@@ -71,8 +75,9 @@ def start_record_audio()
   buffer_size = get(:buffer_size)
   buf = buffer(id, buffer_size)
   print "buf=", buf
+  
   # Record audio into buffer
-  set :start_tick, get(:tick) # Might want to namespace :start_tick with the buffer's id
+  set :start_time, Time.now.to_f
   with_fx :record, buffer: buf do
     live_audio :live_audio_synth
   end
@@ -80,8 +85,16 @@ end
 
 
 def stop_record_audio()
+  # Stop audio
+  ##| sync :tick
   live_audio :live_audio_synth, :stop
-  size = get(:tick) - get(:start_tick)
+  
+  # Calculate size
+  size = Time.now.to_f - get(:start_time)
+  size = size.floor(4)
+  print size
+  
+  # Update buffer_ids
   buffer_ids = get(:buffer_ids)
   curr_buffer_id = get(:curr_buffer_id)
   print "curr_buffer_id=", curr_buffer_id
@@ -98,25 +111,39 @@ def stop_record_audio()
 end
 
 
+#################
+##|           |##
+##| Playback  |##
+##| Functions |##
+##|           |##
+#################
+
+
 def play_audio()
+  # Prep to play
   set :play, true
   buffer_size = get(:buffer_size)
   buffer_ids = get(:buffer_ids)
   print "buffer_ids=", buffer_ids
+  
+  # Play each buffer
   buffer_ids.each do |buf|
-    if buf[:play]
-      loop do
-        if get(:play)
-          sample buffer(buf[:id], buffer_size)
-        else
-          return
+    in_thread do
+      if buf[:play]
+        loop do
+          if get(:play)
+            sample buffer(buf[:id], buffer_size)
+          else
+            kill
+          end
+          print "size=", buf[:size]
+          sleep [buf[:size], 1].max # Should never be 0
         end
-        ##| print "size=", buf[:size]
-        sleep [buf[:size], 1].max
       end
     end
   end
 end
+
 
 def pause_audio()
   print "buffer_ids=", get(:buffer_ids)
@@ -126,26 +153,40 @@ end
 
 def delete_buffers()
   print "buffer_ids=", get(:buffer_ids)
-  set :buffer_ids, []
+  set :buffer_ids, SonicPi::Core::SPVector[]
   print "buffer_ids=", get(:buffer_ids)
 end
 
+#################
+##|           |##
+##|   Other   |##
+##| Functions |##
+##|           |##
+#################
 
 def kick()
   sample :bd_haus, rate: 1
+  print Time.now.to_f
 end
 
 
 #################
-##|           |##k##
+##|           |##
+##| Metronome |##
+##|           |##
 #################
 
-in_thread do
-  live_loop :metronome do
-    set :tick, tick
-    sleep 1
+if metronome
+  in_thread do
+    live_loop :metronome do
+      ##| use_real_time
+      set :tick, tick
+      play 77, release: 0.05
+      sleep 1
+    end
   end
 end
+
 
 #####################
 ##|               |##
@@ -159,14 +200,13 @@ osc_commands = [
   {message: "/osc/looper/stop",   fn: :stop_record_audio},
   {message: "/osc/looper/play",   fn: :play_audio},
   {message: "/osc/looper/pause",  fn: :pause_audio},
-  {message: "/osc/looper/delete", fn: :deklete_buffers},
+  {message: "/osc/looper/delete", fn: :delete_buffers},
 ]
 
 osc_commands.each do |osc_command|
   in_thread do
     live_loop osc_command[:fn] do
-      ##| print tick
-      use_real_time # TODO: I might want to not use real time for play/pause, idk
+      use_real_time
       sync osc_command[:message]
       method(osc_command[:fn]).()
     end
