@@ -6,6 +6,7 @@
 # TODO (first): `play` must play on a loop. I probably need to record the length
 # of the actual content and pass that around in the buffer_ids list
 
+# TODO: There are state change bugs
 # TODO: `start` osc command should be able to specify buffer
 # TODO: `pause` osc command should be able to specify buffer (logical branch to modify the buffer's :play boolean)
 # TODO: new osc commands to control the metronome
@@ -13,6 +14,7 @@
 # TODO: Output information about the buffers via osc_send
 
 # TODO: Not important, but `buffer_ids` is no longer an accurate name
+# TODO: Minimize access to global variables
 
 require 'securerandom'
 
@@ -30,7 +32,7 @@ use_bpm 60
 ##| fairly certain it will be less than 32 beats.
 ##| If this turns out to be an issue I can increase
 ##| the size later.
-set :buffer_size, 4 # 32
+set :buffer_size, 8 # 32
 
 ############
 ##|      |##
@@ -42,7 +44,7 @@ set :buffer_ids, []
 
 #################
 ##|           |##
-##| Functions |##
+##| Functions |## # TODO: Make this a better title
 ##|           |##
 #################
 
@@ -53,7 +55,9 @@ set :buffer_ids, []
 def new_buffer_id()
   id = SecureRandom.uuid.to_sym
   buffer_ids = get(:buffer_ids)
-  buffer_ids += [{id: id, play: true, size: -1}]
+  buffer_ids += [{id: id,
+                  play: true,
+                  size: get(:buffer_size)}]
   set :buffer_ids, buffer_ids
   return id
 end
@@ -63,6 +67,7 @@ def start_record_audio()
   # Create a new buffer
   id = new_buffer_id
   set :curr_buffer_id, id
+  print "new_buffer_id=", id
   buffer_size = get(:buffer_size)
   buf = buffer(id, buffer_size)
   # Record audio into buffer
@@ -78,11 +83,15 @@ def stop_record_audio()
   size = get(:tick) - get(:start_tick)
   buffer_ids = get(:buffer_ids)
   curr_buffer_id = get(:curr_buffer_id)
-  # may need to prepend with @
-  buffer_id = buffer_ids.find { |b| b[:id] == curr_buffer_id }
-  print buffer_id
-  # TODO: Finish this. I need the index of the buffer too because
-  # I don't want to change it's location in the array.
+  new_buffer_ids = SonicPi::Core::SPVector.new(
+    buffer_ids.map do |b|
+      if b[:id] == curr_buffer_id
+        SonicPi::Core::SPVector.new(b.put(:size, size))
+      else
+        SonicPi::Core::SPVector.news(b)
+      end
+  end)
+  set :buffer_ids, new_buffer_ids
 end
 
 
@@ -91,6 +100,7 @@ def play_audio()
   buffer_size = get(:buffer_size)
   buffer_ids = get(:buffer_ids)
   buffer_ids.each do |buf|
+    print buf
     if buf[:play]
       loop do
         if get(:play)
@@ -98,14 +108,15 @@ def play_audio()
         else
           return
         end
-        sleep buffer_size # TODO: This should be taken from the buf hash map and will be less than buffer_size
+        #sleep buffer_size
+        sleep buf[:size]
       end
     end
   end
 end
 
 def pause_audio()
-  set :play, falsej
+  set :play, false
 end
 
 
@@ -157,5 +168,6 @@ osc_commands.each do |osc_command|
     end
   end
 end
+
 
 
