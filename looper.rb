@@ -3,7 +3,6 @@
 # someone else's attempt (check the gist):
 # https://in-thread.sonic-pi.net/t/betaversion-of-live-looper-with-touchosc-interface/379/2
 
-# TODO: Make the osc listeners more data oriented instead of code oriented
 # TODO: Rather than storing just the buffer_id, store a
 # map with a `play?` boolean.
 # TODO: play_audio should honor the play boolean
@@ -84,6 +83,10 @@ def play_audio()
 end
 
 
+def delete_buffers()
+  set :buffer_ids, []
+end
+
 
 #####################
 ##|               |##
@@ -92,10 +95,11 @@ end
 #####################
 
 osc_commands = [
-  {message: "/osc/trigger/kick",  fn: :kick},
-  {message: "/osc/trigger/start", fn: :start_record_audio},
-  {message: "/osc/trigger/stop",  fn: :stop_record_audio},
-  {message: "/osc/trigger/play",  fn: :play_audio},
+  {message: "/osc/looper/kick",  fn: :kick},
+  {message: "/osc/looper/start", fn: :start_record_audio},
+  {message: "/osc/looper/stop",  fn: :stop_record_audio},
+  {message: "/osc/looper/play",  fn: :play_audio},
+  {message: "/osc/looper/delete", fn: :delete_buffers},
 ]
 
 osc_commands.each do |osc_command|
