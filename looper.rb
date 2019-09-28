@@ -68,9 +68,9 @@ def start_record_audio()
   # Create a new buffer
   id = new_buffer_id
   set :curr_buffer_id, id
-  print "new_buffer_id=", id
   buffer_size = get(:buffer_size)
   buf = buffer(id, buffer_size)
+  print "buf=", buf
   # Record audio into buffer
   set :start_tick, get(:tick) # Might want to namespace :start_tick with the buffer's id
   with_fx :record, buffer: buf do
@@ -84,12 +84,14 @@ def stop_record_audio()
   size = get(:tick) - get(:start_tick)
   buffer_ids = get(:buffer_ids)
   curr_buffer_id = get(:curr_buffer_id)
+  print "curr_buffer_id=", curr_buffer_id
+  print "buffer_ids=", buffer_ids
   new_buffer_ids = SonicPi::Core::SPVector.new(
     buffer_ids.map do |b|
       if b[:id] == curr_buffer_id
         SonicPi::Core::SPMap.new(b.put(:size, size))
       else
-        SonicPi::Core::SPMap.news(b)
+        SonicPi::Core::SPMap.newk(b)
       end
   end)
   set :buffer_ids, new_buffer_ids
@@ -100,8 +102,8 @@ def play_audio()
   set :play, true
   buffer_size = get(:buffer_size)
   buffer_ids = get(:buffer_ids)
+  print "buffer_ids=", buffer_ids
   buffer_ids.each do |buf|
-    print "buf=", buf
     if buf[:play]
       loop do
         if get(:play)
@@ -109,20 +111,23 @@ def play_audio()
         else
           return
         end
-        print "size=", buf[:size]
-        sleep buf[:size]
+        ##| print "size=", buf[:size]
+        sleep [buf[:size], 1].max
       end
     end
   end
 end
 
 def pause_audio()
+  print "buffer_ids=", get(:buffer_ids)
   set :play, false
 end
 
 
 def delete_buffers()
+  print "buffer_ids=", get(:buffer_ids)
   set :buffer_ids, []
+  print "buffer_ids=", get(:buffer_ids)
 end
 
 
@@ -156,14 +161,14 @@ osc_commands = [
   {message: "/osc/looper/stop",   fn: :stop_record_audio},
   {message: "/osc/looper/play",   fn: :play_audio},
   {message: "/osc/looper/pause",  fn: :pause_audio},
-  {message: "/osc/looper/delete", fn: :delete_buffers},
+  {message: "/osc/looper/delete", fn: :deklete_buffers},
 ]
 
 osc_commands.each do |osc_command|
   in_thread do
-    live_loop osc_command[:fn] do
-      print tick
-      use_real_time
+    loop do
+      ##| print tick
+      use_real_time # TODO: I want to not use real time for play/pause, idk
       sync osc_command[:message]
       method(osc_command[:fn]).()
     end
