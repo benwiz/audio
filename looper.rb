@@ -3,9 +3,11 @@
 # someone else's attempt (check the gist):
 # https://in-thread.sonic-pi.net/t/betaversion-of-live-looper-with-touchosc-interface/379/2
 
-# TODO: Keep buffers in a list. May want to make it static length,
-# the UX may be better. Just make it plenty large (like 10 or 20).
-# TODO: Add osc controls to delete buffers from the list
+# TODO: Make the osc listeners more data oriented instead of code oriented
+# TODO: Rather than storing just the buffer_id, store a
+# map with a `play?` boolean.
+# TODO: play_audio should honor the play boolean
+# TODO: OSC command to set the play boolean (or toggle if no args)
 
 require 'securerandom'
 
@@ -24,20 +26,29 @@ use_bpm 60
 ##| the size later.
 buffer_size = 32
 
+############
+##|      |##
+##| Init |##
+##|      |##
+############
+
+set :buffer_ids, []
+
 #################
 ##|           |##
 ##| Functions |##
 ##|           |##
 #################
 
+# Generate a new id and add it to the
+# global list of buffer ids. Return
+# new id.
 define :new_buffer_id do
-  set :buffer_id, SecureRandom.uuid.to_sym
-end
-
-
-define :get_buffer do
-  buffer_id = get(:buffer_id)
-  buf = buffer(buffer_id, buffer_size)
+  id = SecureRandom.uuid.to_sym
+  buffer_ids = get(:buffer_ids)
+  buffer_ids += [id]
+  set :buffer_ids, buffer_ids
+  return id
 end
 
 
@@ -47,8 +58,10 @@ end
 
 
 define :start_record_audio do
-  new_buffer_id
-  buf = get_buffer
+  # Create a new buffer
+  id = new_buffer_id
+  buf = buffer(id, buffer_size)
+  # Record audio into buffer
   with_fx :record, buffer: buf do
     live_audio :live_audio_synth
   end
@@ -61,8 +74,20 @@ end
 
 
 define :play_audio do
-  sample get_buffer
+  buffer_ids = get(:buffer_ids)
+  buffer_ids.each do |id|
+    sample buffer(id, buffer_size)
+  end
 end
+
+
+# FIXME
+define :logbuffers do
+  buffer_ids = get(:buffer_ids)
+  puts "buffer_ids::"
+  puts buffer_ids
+end
+
 
 #####################
 ##|               |##
@@ -102,6 +127,14 @@ in_thread do
     use_real_time
     sync "/osc/trigger/play"
     play_audio
+  end
+end
+
+in_thread do
+  live_loop :logbuffers do
+    use_real_time
+    sync "/osc/trigger/logbuffers"
+    logbuffers
   end
 end
 
