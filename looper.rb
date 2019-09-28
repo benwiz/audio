@@ -41,6 +41,7 @@ set :buffer_size, 8 # 32
 ############
 
 set :buffer_ids, []
+set :play, true
 
 #################
 ##|           |##
@@ -86,9 +87,9 @@ def stop_record_audio()
   new_buffer_ids = SonicPi::Core::SPVector.new(
     buffer_ids.map do |b|
       if b[:id] == curr_buffer_id
-        SonicPi::Core::SPVector.new(b.put(:size, size))
+        SonicPi::Core::SPMap.new(b.put(:size, size))
       else
-        SonicPi::Core::SPVector.news(b)
+        SonicPi::Core::SPMap.news(b)
       end
   end)
   set :buffer_ids, new_buffer_ids
@@ -100,7 +101,7 @@ def play_audio()
   buffer_size = get(:buffer_size)
   buffer_ids = get(:buffer_ids)
   buffer_ids.each do |buf|
-    print buf
+    print "buf=", buf
     if buf[:play]
       loop do
         if get(:play)
@@ -108,7 +109,7 @@ def play_audio()
         else
           return
         end
-        #sleep buffer_size
+        print "size=", buf[:size]
         sleep buf[:size]
       end
     end
