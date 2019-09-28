@@ -91,7 +91,7 @@ def stop_record_audio()
       if b[:id] == curr_buffer_id
         SonicPi::Core::SPMap.new(b.put(:size, size))
       else
-        SonicPi::Core::SPMap.newk(b)
+        SonicPi::Core::SPMap.new(b)
       end
   end)
   set :buffer_ids, new_buffer_ids
@@ -137,9 +137,7 @@ end
 
 
 #################
-##|           |##
-##| Metronome |##
-##|           |##
+##|           |##k##
 #################
 
 in_thread do
@@ -166,9 +164,9 @@ osc_commands = [
 
 osc_commands.each do |osc_command|
   in_thread do
-    loop do
+    live_loop osc_command[:fn] do
       ##| print tick
-      use_real_time # TODO: I want to not use real time for play/pause, idk
+      use_real_time # TODO: I might want to not use real time for play/pause, idk
       sync osc_command[:message]
       method(osc_command[:fn]).()
     end
