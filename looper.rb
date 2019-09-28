@@ -12,7 +12,6 @@
 # TODO: Add metronome and related osc commands
 # TODO: Output information about the buffers via osc_send
 
-# FIXME: Record->Stop Recording->Play->Pause->Play won't play again
 
 require 'securerandom'
 
@@ -84,6 +83,8 @@ def play_audio()
       loop do
         if get(:play)
           sample buffer(buf[:id], buffer_size)
+        else
+          return
         end
         sleep buffer_size # TODO: This should be taken from the buf hash map and will be less than buffer_size
       end
@@ -92,7 +93,7 @@ def play_audio()
 end
 
 def pause_audio()
-  set :play, false
+  set :play, falsej
 end
 
 
