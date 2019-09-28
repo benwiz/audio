@@ -5,9 +5,14 @@
 
 # TODO: Rather than storing just the buffer_id, store a
 # map with a `play?` boolean.
+# TODO: `play` must play on a loop. I probably need to record the length
+# of the actual content and pass that around in the buffer_ids list
+# TODO: `start` osc command should be able to dictate a specific buffer
+# TODO: `pause` osc command
 # TODO: play_audio should honor the play boolean
-# TODO: OSC command to set the play boolean (or toggleif no args)
+# TODO: OSC command to set the play boolean (or toggle if no args)
 # TODO: Add metronome and related osc commands
+
 # TODO: Output information about the buffers via osc_send
 
 require 'securerandom'
@@ -25,7 +30,7 @@ use_bpm 60
 ##| fairly certain it will be less than 32 beats.
 ##| If this turns out to be an issue I can increase
 ##| the size later.
-buffer_size = 32
+set :buffer_size, 32
 
 ############
 ##|      |##
@@ -48,20 +53,17 @@ set :buffer_ids, []
 def new_buffer_id()
   id = SecureRandom.uuid.to_sym
   buffer_ids = get(:buffer_ids)
-  buffer_ids += [id]
+  buffer_ids += [{id: id, play: true}]
   set :buffer_ids, buffer_ids
+  print "hello"
   return id
-end
-
-
-def kick()
-  sample :bd_haus, rate: 1
 end
 
 
 def start_record_audio()
   # Create a new buffer
   id = new_buffer_id
+  buffer_size = get(:buffer_size)
   buf = buffer(id, buffer_size)
   # Record audio into buffer
   with_fx :record, buffer: buf do
@@ -76,15 +78,23 @@ end
 
 
 def play_audio()
+  buffer_size = get(:buffer_size)
   buffer_ids = get(:buffer_ids)
-  buffer_ids.each do |id|
-    sample buffer(id, buffer_size)
+  buffer_ids.each do |buf|
+    if buf[:play]
+      sample buffer(buf[:id], buffer_size)
+    end
   end
 end
 
 
 def delete_buffers()
   set :buffer_ids, []
+end
+
+
+def kick()
+  sample :bd_haus, rate: 1
 end
 
 
