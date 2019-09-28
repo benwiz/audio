@@ -6,10 +6,10 @@
 # TODO (first): `play` must play on a loop. I probably need to record the length
 # of the actual content and pass that around in the buffer_ids list
 
-# TODO: `start` osc command should be able to dictate a specific buffer to overwrite (or create). May need to have a static length array.
-# TODO: `pause` osc command
-# TODO: OSC command to set the play boolean (or toggle if no args)
-# TODO: Add metronome and related osc commands
+# TODO: `start` osc command should be able to specify buffer
+# TODO: `pause` osc command should be able to specify buffer (logical branch to modify the buffer's :play boolean)
+# TODO: new osc commands to control the metronome
+# TODO: osc commands should be namespaced better
 # TODO: Output information about the buffers via osc_send
 
 
