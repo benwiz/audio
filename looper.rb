@@ -12,6 +12,8 @@
 # TODO: Add metronome and related osc commands
 # TODO: Output information about the buffers via osc_send
 
+# FIXME: Record->Stop Recording->Play->Pause->Play won't play again
+
 require 'securerandom'
 
 ###############
@@ -27,7 +29,7 @@ use_bpm 60
 ##| fairly certain it will be less than 32 beats.
 ##| If this turns out to be an issue I can increase
 ##| the size later.
-set :buffer_size, 8 # 32
+set :buffer_size, 4 # 32
 
 ############
 ##|      |##
@@ -82,8 +84,8 @@ def play_audio()
       loop do
         if get(:play)
           sample buffer(buf[:id], buffer_size)
-          sleep buffer_size # TODO: This should be taken from the buf hash map and will be less than buffer_size
         end
+        sleep buffer_size # TODO: This should be taken from the buf hash map and will be less than buffer_size
       end
     end
   end
@@ -110,13 +112,13 @@ end
 ##|           |##
 #################
 
-in_thread do
-  live_loop :metronome do
-    ##| use_real_time
-    set :tick, tick
-    sleep 1
-  end
-end
+##| in_thread do
+##|   live_loop :metronome do
+##|     ##| use_real_time
+##|     set :tick, tick
+##|     sleep 1
+##|   end
+##| end
 
 #####################
 ##|               |##
