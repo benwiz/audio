@@ -12,8 +12,10 @@
 # TODO: osc commands should be namespaced better
 # TODO: Output information about the buffers via osc_send
 
+# TODO: Not important, but `buffer_ids` is no longer an accurate name
 
 require 'securerandom'
+
 
 ###############
 ##|         |##
@@ -51,7 +53,7 @@ set :buffer_ids, []
 def new_buffer_id()
   id = SecureRandom.uuid.to_sym
   buffer_ids = get(:buffer_ids)
-  buffer_ids += [{id: id, play: true}]
+  buffer_ids += [{id: id, play: true, size: -1}]
   set :buffer_ids, buffer_ids
   return id
 end
@@ -60,9 +62,11 @@ end
 def start_record_audio()
   # Create a new buffer
   id = new_buffer_id
+  set :curr_buffer_id, id
   buffer_size = get(:buffer_size)
   buf = buffer(id, buffer_size)
   # Record audio into buffer
+  set :start_tick, get(:tick) # Might want to namespace :start_tick with the buffer's id
   with_fx :record, buffer: buf do
     live_audio :live_audio_synth
   end
@@ -71,6 +75,14 @@ end
 
 def stop_record_audio()
   live_audio :live_audio_synth, :stop
+  size = get(:tick) - get(:start_tick)
+  buffer_ids = get(:buffer_ids)
+  curr_buffer_id = get(:curr_buffer_id)
+  # may need to prepend with @
+  buffer_id = buffer_ids.find { |b| b[:id] == curr_buffer_id }
+  print buffer_id
+  # TODO: Finish this. I need the index of the buffer too because
+  # I don't want to change it's location in the array.
 end
 
 
@@ -113,13 +125,12 @@ end
 ##|           |##
 #################
 
-##| in_thread do
-##|   live_loop :metronome do
-##|     ##| use_real_time
-##|     set :tick, tick
-##|     sleep 1
-##|   end
-##| end
+in_thread do
+  live_loop :metronome do
+    set :tick, tick
+    sleep 1
+  end
+end
 
 #####################
 ##|               |##
