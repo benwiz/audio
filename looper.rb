@@ -4,16 +4,25 @@
 # https://in-thread.sonic-pi.net/t/betaversion-of-live-looper-with-touchosc-interface/379/2
 
 # TODO: osc commands should always be able to be called without breaking
-# TODO: `start` osc command should be able to specify buffer
-# TODO: `pause` osc command should be able to specify buffer (logical branch to modify the buffer's :play boolean)
 # TODO: `play` should automatically pick up new  tracks, calling it again shouldn't do anything
+# To complete this, I may want to send an osc message from `stop` that kills then restarts the `play` thread
+# Since threads are named, it could be easy to kill a thread from the outside, maybe.
+# TODO: Audio should always be passed through
+
+
+# ~~ Only above must be done before I start using it.
+# ~~ Don't do the below until I've got it working consistently
+
+
+# TODO: `start` osc command should be able to specify buffer
+# TODO: `pause` osc command should be able to specify buffer
 # TODO: new osc commands to control the metronome
-# TODO: osc commands should be namespaced better
-# TODO: Output information about the buffers via osc_send
+# TODO: osc commands should be namespaced better, even when it isn't recording
+# TODO (probably): Expose state via osc messages
+# TODO: Always pass live audio onward
 
 # FIXME: There is a minor audible glitch when looping. I'm pretty
-# certain is related to either record function or the microphone
-# hardware I am using, not the playback.
+# certain this is a microphone hardware issue.
 
 require 'securerandom'
 
@@ -42,6 +51,7 @@ set :buffer_size, 8 # 32
 
 set :buffer_ids, []
 set :play, true
+live_audio :tunnel
 
 #################
 ##|           |##
@@ -49,6 +59,7 @@ set :play, true
 ##| Functions |##
 ##|           |##
 #################
+
 
 # Generate a new id and add it to the
 # global list of buffer ids. Return
@@ -73,10 +84,13 @@ def start_record_audio()
   buf = buffer(id, buffer_size)
   print "buf=", buf
   
+  # Stop the other live_audio
+  live_audio :tunnel, :stop
+  
   # Record audio into buffer
   set :start_time, Time.now.to_f
   with_fx :record, buffer: buf do
-    live_audio :live_audio_synth
+    live_audio :recording
   end
 end
 
@@ -84,9 +98,12 @@ end
 def stop_record_audio()
   # Stop audio and calculate size
   size = Time.now.to_f - get(:start_time)
-  live_audio :live_audio_synth, :stop
+  live_audio :recording, :stop
   size = size.floor(4)
   print size
+  
+  # Start using the live_audio tunnel
+  live_audio :tunnel
   
   # Update buffer_ids
   buffer_ids = get(:buffer_ids)
