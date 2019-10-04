@@ -4,8 +4,6 @@
    [overtone.osc :as osc]))
 
 ;; TODO: Create topic
-;; First, do the following tutorial in a comment
-;; https://github.com/clojure/core.async/wiki/Pub-Sub
 
 #_(defn server [port]
   (osc-server port))
