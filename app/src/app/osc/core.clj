@@ -1,14 +1,52 @@
 (ns app.osc.core
-  (:require [overtone.osc :as osc]
-            [clojure.core.async :as a]))
+  (:require
+   [clojure.core.async :refer :all]
+   [overtone.osc :as osc]))
 
 ;; TODO: Create topic
 ;; First, do the following tutorial in a comment
 ;; https://github.com/clojure/core.async/wiki/Pub-Sub
 
-(defn server [port]
+#_(defn server [port]
   (osc-server port))
 
+;; Pub Sub
+(comment
+  (def input-chan (chan))
+  (def our-pub (pub input-chan :msg-type))
+
+  (>!! input-chan {:msg-type :greeting :text "hello"})
+
+  (def output-chan (chan))
+  (sub our-pub :greeting output-chan)
+
+  (go-loop []
+    (let [{:keys [text]} (<! output-chan)]
+      (println text)
+      (recur)))
+
+  (>!! input-chan {:msg-type :greeting :text "hello!!!"})
+
+  (let [c (chan)]
+    (sub our-pub :greeting c)
+    (go-loop []
+      (let [{:keys [msg-type text]} (<! c)]
+        (println text))
+      (recur)))
+
+  (>!! input-chan {:msg-type :greeting :text "hola"})
+
+  (def loser-chan (chan))
+  (sub our-pub :loser loser-chan)
+  (>!! input-chan {:msg-type :loser :text "I won't be accepted"})
+  ;; still returns true
+  ;; the moral is: a channel must actually consume (<!) messages
+
+  ;; https://github.com/clojure/core.async/wiki/Pub-Sub
+
+  )
+
+;; OSC
 (comment
   ;; Client
   (def client (osc/osc-client "localhost" 4559))
