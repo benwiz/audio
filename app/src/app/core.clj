@@ -5,7 +5,7 @@
   (:gen-class))
 
 
-;; TODO: Use Integrant, it will speed up development
+;; TODO: Use Integrant, it will speed up development (use a system.clj)
 ;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: Plan out osc messages and apis better
 ;; TODO: The ruby file and clojure stuff should both read from the same config file for api routes
