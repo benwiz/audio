@@ -1,12 +1,35 @@
 (ns app.osc.core
   (:require
    [clojure.core.async :refer :all]
-   [overtone.osc :as osc]))
+   [overtone.osc :as osc]
+   [clojure.java.io :as io]))
 
-;; TODO: Create topic
+;; TODO: Subscribe to messages that need to be sent to the dsp
+;; TODO: Receive messages from the dsp
 
-#_(defn server [port]
-  (osc-server port))
+
+(defn app->dsp [client in]
+  (let [out (chan)
+        p   (pub in :msg-type)]
+    (sub p :osc out)
+    (go-loop []
+      (let [{:keys [msg-type msg]} (<! in)]
+        (osc/osc-send client msg))
+      (recur))))
+
+
+(comment
+  (def config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string))
+  config
+
+  (def client (osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config)))
+  (def in (chan))
+  (app->dsp client in)
+  (>!! in {:msg-type :osc :msg "/looper/kick"})
+  )
+
+
+
 
 ;; Pub Sub
 (comment

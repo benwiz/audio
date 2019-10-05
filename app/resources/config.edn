@@ -1,0 +1,2 @@
+{:dsp-osc-host "localhost" ;; "192.168.0.240"
+ :dsp-osc-port 4559}
