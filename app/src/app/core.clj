@@ -4,8 +4,8 @@
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]])
   (:gen-class))
 
-;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: Use Integrant, it will speed up development
+;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: Plan out osc messages and apis better
 
 
