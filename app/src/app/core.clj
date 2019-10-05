@@ -4,7 +4,6 @@
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]])
   (:gen-class))
 
-;; TODO: Send "/looper/kick" to dsp from comment in this file
 ;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: Use Integrant, it will speed up development
 ;; TODO: Plan out osc messages and apis better
@@ -26,17 +25,23 @@
       (recur))))
 
 
-(defn -main []
+(defn init [dsp->app-chan app->dsp-chan]
   (let [config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string)
         server (osc/osc-server (:app-osc-port config))
-        in (chan)]
-    (osc/dsp->app server in)
-    (dsp-listener in)))
+        client (overtone.osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config))]
+    (osc/dsp->app server dsp->app-chan)
+    (dsp-listener dsp->app-chan)
+
+    (osc/app->dsp client app->dsp-chan)))
 
 (comment
-  ;; Test the above
-  (def client (overtone.osc/osc-client "localhost" (:app-osc-port config)))
-  (overtone.osc/osc-send client "/foo/bar")
-  (overtone.osc/osc-send client "/foo/baz")
+  (def config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string))
+
+  ;; Send messages (and get api responses)
+  (def dsp->app-chan (chan))
+  (def app->dsp-chan (chan))
+  (init dsp->app-chan app->dsp-chan)
+  (>!! app->dsp-chan {:msg-type :osc :msg "/looper/kick"})
+
 
   )
