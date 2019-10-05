@@ -1,6 +1,6 @@
 (ns app.core
   (:require
-   [app.osc.core :as osc]
+   [app.osc :as osc]
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]])
   (:gen-class))
 
