@@ -1,11 +1,8 @@
 (ns app.osc.core
   (:require
-   [clojure.core.async :refer :all]
+   [clojure.core.async :refer [chan pub sub >!! <! go-loop]]
    [overtone.osc :as osc]
    [clojure.java.io :as io]))
-
-;; TODO: Subscribe to messages that need to be sent to the dsp
-;; TODO: Receive messages from the dsp
 
 
 (defn app->dsp [client in]
@@ -13,19 +10,42 @@
         p   (pub in :msg-type)]
     (sub p :osc out)
     (go-loop []
-      (let [{:keys [msg-type msg]} (<! in)]
+      (let [{:keys [msg-type msg]} (<! out)]
         (osc/osc-send client msg))
       (recur))))
 
 
+(defn osc-server [port]
+  (osc/osc-server port))
+
+
+(defn dsp->app [server in]
+  (osc/osc-listen server
+                  (fn [msg]
+                    ;; WARNING: This is blocking without a receiver
+                    (>!! in {:msg-type :osc
+                             :msg      (select-keys msg [:path :args])}))))
+
+
+
+
+
 (comment
   (def config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string))
-  config
 
+  ;; Send messages
   (def client (osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config)))
   (def in (chan))
   (app->dsp client in)
   (>!! in {:msg-type :osc :msg "/looper/kick"})
+
+  ;; Receive messages
+  (def server2 (osc-server (:app-osc-port config)))
+  (def client2 (osc/osc-client "localhost" (:app-osc-port config)))
+  (def in2 (chan))
+  (dsp->app server2 in2)
+  (osc/osc-send client2 "/foo/bar")
+
   )
 
 
