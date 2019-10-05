@@ -4,9 +4,11 @@
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]])
   (:gen-class))
 
+
 ;; TODO: Use Integrant, it will speed up development
 ;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: Plan out osc messages and apis better
+;; TODO: The ruby file and clojure stuff should both read from the same config file for api routes
 
 
 (defn router [{:keys [path args]}] ;; eventually, maybe use reitit
@@ -42,6 +44,7 @@
   (def app->dsp-chan (chan))
   (init dsp->app-chan app->dsp-chan)
   (>!! app->dsp-chan {:msg-type :osc :msg "/looper/kick"})
+  (>!! app->dsp-chan {:msg-type :osc :msg "/looper/api/echo"})
 
 
   )
