@@ -9,10 +9,10 @@
 
 
 ;; TODO: Look into starting sonic pi from clojure
+;; TODO: Create all routes in routes.edn
 ;; TODO: Generate ruby routes from routes.edn
-;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
+;; TODO: Test that everything works by requesting the bpm from sonic pi and having it respond with another osc call to the app and print the current bpm
 ;; TODO: Incorporate osc arguments
-;; TODO: Call sonic pi ruby files from clojure
 
 
 (defn- routes []
