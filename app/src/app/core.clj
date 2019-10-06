@@ -44,20 +44,3 @@
       (let [{:keys [msg-type msg]} (<! out)]
         (route msg))
       (recur))))
-
-
-
-
-(comment
-  (def config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string))
-
-  ;; Send messages (and get api responses)
-  (def dsp->app-chan (chan))
-  (def app->dsp-chan (chan))
-  (init dsp->app-chan app->dsp-chan)
-  (>!! app->dsp-chan {:msg-type :osc :msg "/looper/kick"})
-  (>!! app->dsp-chan {:msg-type :osc :msg "/looper/echo"})
-  (>!! dsp->app-chan {:msg-type :osc :msg "/looper/echo"})
-  (>!! dsp->app-chan {:msg-type :osc :msg "/looper/foo"})
-
-  )
