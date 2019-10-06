@@ -1,4 +1,4 @@
-(ns app.osc.core
+(ns app.osc
   (:require
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]]
    [overtone.osc :as osc]
