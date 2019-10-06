@@ -34,7 +34,7 @@
   @s
 
   ;; These go to the reitit router
-  (simulate-dsp->app-msg s "/app/ticke")
+  (simulate-dsp->app-msg s "/app/tick")
 
   ;; These go to sonic pi
   (simulate-app->dsp-msg s "/looper/kick")

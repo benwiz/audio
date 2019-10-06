@@ -2,6 +2,7 @@
   (:require
    [integrant.core :as ig]
    [clojure.core.async :as a]
+   [app.dsp :as dsp]
    [app.core :as app]
    [app.osc :as osc]))
 
@@ -10,7 +11,9 @@
 
 
 (def config
-  {:chan/dsp->app    {}
+  {:dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
+                      :filepath           "./resources/looper.rb"}
+   :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
    :osc/client       {:host "localhost"
@@ -36,6 +39,12 @@
 
 
 ;; ------------ Init ------------------------------
+
+
+(defmethod ig/init-key :dsp
+  [_ {:keys [sonic-pi-tool-path filepath]}]
+  (prn "Init :dsp")
+  (dsp/init sonic-pi-tool-path filepath))
 
 
 (defmethod ig/init-key :chan/dsp->app
@@ -81,6 +90,12 @@
 
 
 ;; --------- Halt ---------------------------
+
+
+(defmethod ig/halt-key! :dsp
+  [_ sonic-pi-tool-path]
+  (prn "Halt :dsp")
+  (dsp/halt! sonic-pi-tool-path))
 
 
 (defmethod ig/halt-key! :osc/server
