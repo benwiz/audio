@@ -1,3 +1,0 @@
-{:dsp-osc-host "localhost" ;; "192.168.0.240"
- :dsp-osc-port 4559
- :app-osc-port 9800}

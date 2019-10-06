@@ -11,25 +11,25 @@
 ;; TODO: Incorporate osc arguments
 ;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
 ;; TODO: The ruby file and clojure stuff should both read from the same config file for api routes
+;; TODO: Call sonic pi ruby files from clojure
 
 
-(defn my-handler [name]
+(defn- my-handler [name]
   (println "my-handler::" name))
 
 
-(defn routes []
+(defn- routes []
   [["/looper/echo" {:name :echo :handler my-handler}]
    ["/looper/foo" {:name :foo :handler my-handler}]])
 
 
-(def router
+(def ^:private router
   (r/router
    (routes)))
 
 
-(defn route [path]
+(defn- route [path]
   ;; TODO: Handle route not found
-  (prn "route path:" path)
   (let [r       (r/match-by-path router path)
         data    (:data r)
         name    (:name data)
@@ -47,17 +47,21 @@
       (recur))))
 
 
-(defn init [dsp->app-chan app->dsp-chan]
-  (let [config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string)
-        server (osc/osc-server (:app-osc-port config))
-        client (overtone.osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config))]
+#_(defn- init [dsp->app-chan app->dsp-chan]
+    (let [config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string)
+          server (osc/osc-server (:app-osc-port config))
+          client (overtone.osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config))]
 
-    ;; Initialize incoming (dsp->app) communication
-    (osc/dsp->app server dsp->app-chan)
-    (dsp-listener dsp->app-chan)
+      ;; Initialize incoming (dsp->app) communication
+      (osc/dsp->app server dsp->app-chan)
+      (dsp-listener dsp->app-chan)
 
-    ;; Initialize outgoing (app->dsp) communication
-    (osc/app->dsp client app->dsp-chan)))
+      ;; Initialize outgoing (app->dsp) communication
+      (osc/app->dsp client app->dsp-chan)))
+
+
+
+
 
 (comment
   (def config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string))
@@ -70,6 +74,5 @@
   (>!! app->dsp-chan {:msg-type :osc :msg "/looper/echo"})
   (>!! dsp->app-chan {:msg-type :osc :msg "/looper/echo"})
   (>!! dsp->app-chan {:msg-type :osc :msg "/looper/foo"})
-
 
   )
