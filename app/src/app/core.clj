@@ -13,9 +13,13 @@
 ;; TODO: The ruby file and clojure stuff should both read from the same config file for api routes
 
 
+(defn my-handler [name]
+  (println "my-handler::" name))
+
+
 (defn routes []
-  [["/looper/echo" {:name :echo :handler #(println "echo") :doc "hey there"}]
-   ["/looper/foo" {:name :foo :handler #(println "foo") :doc "foofoo"}]])
+  [["/looper/echo" {:name :echo :handler my-handler}]
+   ["/looper/foo" {:name :foo :handler my-handler}]])
 
 
 (def router
@@ -28,8 +32,9 @@
   (prn "route path:" path)
   (let [r       (r/match-by-path router path)
         data    (:data r)
+        name    (:name data)
         handler (:handler data)]
-    (handler)))
+    (handler name)))
 
 
 (defn dsp-listener [in]
