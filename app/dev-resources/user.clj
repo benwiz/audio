@@ -33,7 +33,11 @@
 (comment
   @s
 
-  (simulate-dsp->app-msg s "/looper/echo")
+  ;; These go to the reitit router
+  (simulate-dsp->app-msg s "/app/ticke")
+
+  ;; These go to sonic pi
   (simulate-app->dsp-msg s "/looper/kick")
+  (simulate-app->dsp-msg s "/looper/bpm")
 
   )
