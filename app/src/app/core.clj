@@ -6,7 +6,6 @@
   (:gen-class))
 
 
-;; TODO: Use Integrant, it will speed up development (use a system.clj)
 ;; TODO: Generate routes from routes.edn
 ;; TODO: Incorporate osc arguments
 ;; TODO: Send "/looper/api/echo" to dsp and print the response (sonic pi file will need to be updated)
@@ -45,20 +44,6 @@
       (let [{:keys [msg-type msg]} (<! out)]
         (route msg))
       (recur))))
-
-
-#_(defn- init [dsp->app-chan app->dsp-chan]
-    (let [config (-> (clojure.java.io/resource "config.edn") slurp clojure.edn/read-string)
-          server (osc/osc-server (:app-osc-port config))
-          client (overtone.osc/osc-client (:dsp-osc-host config) (:dsp-osc-port config))]
-
-      ;; Initialize incoming (dsp->app) communication
-      (osc/dsp->app server dsp->app-chan)
-      (dsp-listener dsp->app-chan)
-
-      ;; Initialize outgoing (app->dsp) communication
-      (osc/app->dsp client app->dsp-chan)))
-
 
 
 
