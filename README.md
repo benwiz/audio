@@ -2,10 +2,10 @@
 
 ## Architecture
 
-- dsp (maybe run in docker, but probably not)
+- dsp
   - a ruby sonic pi file that is run with sonic-pi-tool
-  - manage this with a bash script
-- app (maybe run in docker)
+  - manage this with a bash script or run shell commands with clojure.java.shell
+- app
   - ns: `osc`
     - consumes osc messages from the dsp and publishes them to the _osc:in_ channel
     - subscribes to the _osc:out_ and forwards the messages to the dsp over osc

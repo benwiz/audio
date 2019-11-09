@@ -28,7 +28,10 @@
           nil)))))
 
 
-(defn app->dsp [client in]
+(defn app->dsp
+  "Sink that receives interal messages and forwards
+   them to the dsp server."
+  [client in]
   (let [out (chan)
         p   (pub in :msg-type)]
     (sub p :osc out)
@@ -38,7 +41,10 @@
       (recur))))
 
 
-(defn dsp->app [server in]
+(defn dsp->app
+  "Receive osc messages from dsp server and send
+   to app message"
+  [server in]
   (osc/osc-listen server
                   (fn [msg]
                     ;; WARNING: This is blocking without a receiver

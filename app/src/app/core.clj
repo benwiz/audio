@@ -8,7 +8,6 @@
   (:gen-class))
 
 
-;; TODO: Look into starting sonic pi from clojure
 ;; TODO: Figure out if Integrant can halt when something breaks during start
 ;; TODO: Create all routes in routes.edn
 ;; TODO: Generate ruby routes from routes.edn

@@ -46,7 +46,7 @@ set :buffer_size, 32 # Large enough to hold whatever someone may record. # TODO:
 
 set :buffer_ids, []
 set :play, true
-#live_audio :tunnel
+live_audio :tunnel
 
 
 #################
@@ -78,16 +78,16 @@ def play_audio()
   # When we are not playing
   if get(:play) == false
     set :play, true
-    
+
     # buffer_size = get(:buffer_size) # TODO: I think this can be removed
     buffer_ids = get(:buffer_ids)
     print "buffer_ids=", buffer_ids
-    
+
     # Play each buffer
     buffer_ids.each do |buf|
       play_buffer_in_thread buf
     end
-    
+
   end
 end
 
@@ -130,10 +130,10 @@ def start_record_audio()
     buffer_size = get(:buffer_size)
     buf = buffer(id, buffer_size)
     print "buf=", buf
-    
+
     # Stop the other live_audio
     live_audio :tunnel, :stop
-    
+
     # Record audio into buffer
     set :start_time, Time.now.to_f
     with_fx :record, buffer: buf do
@@ -147,18 +147,18 @@ def stop_record_audio()
   # When the system is recording into a buffer
   if get(:curr_buffer_id)
     print "stop_record_audio"
-    
+
     # Stop audio and calculate size using clock time
     size = Time.now.to_f - get(:start_time)
     live_audio :recording, :stop
     size = size.floor(4)
     print "size=", size
-    
+
     # Start using the live_audio :tunnel
     live_audio :tunnel
-    
+
     buf = nil
-    
+
     # When bukffer is long enough)
     if size > 0.5
       # Update buffer_ids
@@ -178,11 +178,11 @@ def stop_record_audio()
           end
       end)
     end
-    
+
     # Update global state
     set :curr_buffer_id, nil
     set :buffer_ids, new_buffer_ids
-    
+
     # Start playing the new recording immediately
     if buf # Probably unnecessary precaution
       print "buf:", buf
@@ -226,7 +226,7 @@ end
 
 def metronome_on()
   set :metronome, true
-  
+
   in_thread do
     loop do
       if get(:metronome)
@@ -272,7 +272,3 @@ osc_commands.each do |osc_command|
     end
   end
 end
-
-
-
-
