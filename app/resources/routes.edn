@@ -3,13 +3,13 @@
 
 ;; The routes under `app` are what the dsp sends to the clojure app. Specifically they
 ;; will be continuous updates to the app or triggered responses to requests from the `app`.
-;; Both the `app` will read this and the dsp will read the routes under `app`.
+;; Both the app and the dsp will read the routes under `app`.
 ;; Only the dsp will need to resad the routes under the `dsp` section.
-;; Actually, the GUI will probably want to read from the `dsp` section to dynamically
-;; create a UI that can trigger all dsp commands.
+;; Later, the gui may also read routes under `dsp` but don't worry about that for a while.
 
 {:app [["/app/tick" {:handler app.handlers/tick}]
        ]
 
  :dsp [["/dsp/kick"]
+       ["/dsp/master"] ;; The "master" command gives the dsp control. One button to start, stop, then delete.
        ]}

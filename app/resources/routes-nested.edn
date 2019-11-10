@@ -1,3 +1,5 @@
+;; This is too complicated for my use case. I'm leaving this here
+;; as an example of what not to do. Don't do this.
 {:looper {:children {:recording {:doc "Check the recording state"
                                  :args {}
                                  :children {:start {:doc "Start recording"
