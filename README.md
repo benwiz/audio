@@ -1,5 +1,12 @@
 # guitar-looper
 
+## MacOS Setup
+
+1. Set `iShowU + BuiltIn` arregate device for input
+2. Set `BuiltIn` for output
+3. Start Sonic Pi server with `./bin/sonic-pi-start-server.sh`
+4.
+
 ## Architecture
 
 - dsp
