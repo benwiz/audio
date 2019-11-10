@@ -2,22 +2,26 @@
 
 ## MacOS Setup
 
-1. Set `iShowU + BuiltIn` arregate device for input
+1. Set `BuiltIn` arregate device for input
 2. Set `BuiltIn` for output
 3. Start Sonic Pi server with `./bin/sonic-pi-start-server.sh`
-4.
 
 ## Architecture
 
 - dsp
   - a ruby sonic pi file that is run with sonic-pi-tool
-  - manage this with a bash script or run shell commands with clojure.java.shell
 - app
-  - ns: `osc`
+  - osc
+    - host osc server; consume messages (from dsp); forward them to the
     - consumes osc messages from the dsp and publishes them to the _osc:in_ channel
     - subscribes to the _osc:out_ and forwards the messages to the dsp over osc
-  - ns: `gui` is a react app that consumes info from the _osc:in_ channel and publishes to the _osc:out_ channel
-  - ns: `pi` interfaces with the raspberry pi and consumes from _osc:in_ and publishes to _osc:out_
-    - https://github.com/dvlopt/clojure-raspberry-pi
+  - dsp
+    - load a file into the dsp
 
-- Rather than introduce a message queue, `osc server`, `gui`, and `hardware interface` should all be part of the same jar and leverage clojure.async. There is no need to separate since they are not scaling and will all exist on the same local hardware.
+## To Do
+
+- Purchase parts on Amazon for buttons (don't get knobs yet)
+- Purchase cigar box(es)
+
+- Integrant should take routes.edn and generate routes.json
+- looper.rb should parse routes.json

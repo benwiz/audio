@@ -44,7 +44,7 @@
 (defmethod ig/init-key :dsp
   [_ {:keys [sonic-pi-tool-path filepath]}]
   (prn "Init :dsp")
-  (dsp/init sonic-pi-tool-path filepath))
+  (dsp/init! sonic-pi-tool-path filepath))
 
 
 (defmethod ig/init-key :chan/dsp->app
