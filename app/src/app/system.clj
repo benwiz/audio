@@ -12,7 +12,7 @@
 
 (def config
   {:dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
-                      :filepath           "./resources/looper.rb"}
+                      :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
    :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
@@ -22,7 +22,7 @@
                       :chan   (ig/ref :chan/dsp->app)}
    :osc/app->dsp     {:client (ig/ref :osc/client)
                       :chan   (ig/ref :chan/app->dsp)}
-   :app/dsp-listener {:chan (ig/ref :chan/dsp->app)}})
+   :app/dsp-msg-sink {:chan (ig/ref :chan/dsp->app)}})
 
 
 ;; ------------ Controls --------------------------
@@ -83,10 +83,10 @@
   (osc/app->dsp client chan))
 
 
-(defmethod ig/init-key :app/dsp-listener
+(defmethod ig/init-key :app/dsp-msg-sink
   [_ {:keys [chan]}]
-  (prn "Init :app/dsp-listener")
-  (app/dsp-listener chan))
+  (prn "Init :app/dsp-dispatcher")
+  (app/dsp-msg-sink chan))
 
 
 ;; --------- Halt ---------------------------

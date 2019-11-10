@@ -37,7 +37,7 @@
     (handler)))
 
 
-(defn dsp-listener [in]
+(defn dsp-msg-sink [in]
   (let [out (chan)
         p   (pub in :msg-type)]
     (sub p :osc out)
