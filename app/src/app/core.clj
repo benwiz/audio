@@ -45,3 +45,9 @@
       (let [{:keys [msg-type msg]} (<! out)]
         (route msg))
       (recur))))
+
+
+(defn edn->json [in out]
+  ;; TODO: Use jsonista to parse the in file
+  ;; Use standard clojure to write json file
+  )

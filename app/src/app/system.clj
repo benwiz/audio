@@ -13,6 +13,8 @@
 (def config
   {:dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
                       :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
+   :routes           {:edn-filepath "./resources/routes.edn"
+                      :json-filepath "./resources/routes.json"}
    :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
