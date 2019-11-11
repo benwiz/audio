@@ -23,5 +23,4 @@
 - Purchase parts on Amazon for buttons (don't get knobs yet)
 - Purchase cigar box(es)
 
-- Integrant should take routes.edn and generate routes.json
 - looper.rb should parse routes.json

@@ -8,25 +8,13 @@
   (:gen-class))
 
 
-;; TODO: Figure out if Integrant can halt when something breaks during start
-;; TODO: Create all routes in routes.edn
-;; TODO: Generate ruby routes from routes.edn
-;; TODO: Test that everything works by requesting the bpm from sonic pi and having it respond with another osc call to the app and print the current bpm
-;; TODO: Incorporate osc arguments
-
-
-(defn- routes []
-  (mapv (fn [[path {:keys [handler]}]]
-          [path {:handler @(requiring-resolve handler)}])
-        (-> "routes.edn" io/resource slurp edn/read-string :app)))
-
-(comment
-  (routes))
-
-
 (def ^:private router
   (r/router
-   (routes)))
+   (mapv (fn [[path {:keys [handler]}]]
+           [path {:handler @(requiring-resolve handler)}])
+         ;; TODO: Figure out how to use the integrant key :routes instead
+         ;; of re-reading routes.edn here
+         (-> "routes.edn" io/resource slurp edn/read-string :app))))
 
 
 (defn- route [path]
@@ -45,9 +33,3 @@
       (let [{:keys [msg-type msg]} (<! out)]
         (route msg))
       (recur))))
-
-
-(defn edn->json [in out]
-  ;; TODO: Use jsonista to parse the in file
-  ;; Use standard clojure to write json file
-  )

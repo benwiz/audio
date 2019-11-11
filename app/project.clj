@@ -7,6 +7,7 @@
                  [org.clojure/core.async "0.4.500"]
                  [overtone/osc-clj "0.9.0"]
                  [metosin/reitit "0.3.9"]
+                 [metosin/jsonista "0.2.5"]
                  [integrant "0.7.0"]]
   :main ^:skip-aot app.core
   :target-path "target/%s"

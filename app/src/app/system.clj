@@ -1,20 +1,25 @@
 (ns app.system
   (:require
-   [integrant.core :as ig]
-   [clojure.core.async :as a]
-   [app.dsp :as dsp]
    [app.core :as app]
-   [app.osc :as osc]))
+   [app.dsp :as dsp]
+   [app.osc :as osc]
+   [clojure.core.async :as a]
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [integrant.core :as ig]
+   [jsonista.core :as j])
+  (:import
+   (java.io File)))
 
 
 ;; ----------- Config -----------------------------
 
 
 (def config
-  {:dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
-                      :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
-   :routes           {:edn-filepath "./resources/routes.edn"
+  {:routes           {:edn-filename "routes.edn"
                       :json-filepath "./resources/routes.json"}
+   :dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
+                      :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
    :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
@@ -41,6 +46,14 @@
 
 
 ;; ------------ Init ------------------------------
+
+
+(defmethod ig/init-key :routes
+  [_ {:keys [edn-filename json-filepath]}]
+  (prn "Init :routes")
+  (let [r (-> edn-filename io/resource slurp edn/read-string)]
+    (j/write-value (File. json-filepath) r)
+    r))
 
 
 (defmethod ig/init-key :dsp
