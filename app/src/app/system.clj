@@ -17,8 +17,9 @@
 
 (def config
   {:routes           {:edn-filename "routes.edn"
-                      :json-filepath "./resources/routes.json"}
-   :dsp              {:sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
+                      :json-filepath "./resources/dsp/routes.json"}
+   :dsp              {:routes (ig/ref :routes)
+                      :sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
                       :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
    :chan/dsp->app    {}
    :chan/app->dsp    {}

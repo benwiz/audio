@@ -4,7 +4,8 @@
 
 1. Set `BuiltIn` arregate device for input
 2. Set `BuiltIn` for output
-3. Start Sonic Pi server with `./bin/sonic-pi-start-server.sh`
+3. Follow the logs with `./bin/sonic-pi-logs.sh`
+4. Start Sonic Pi server with `./bin/sonic-pi-start-server.sh`
 
 ## Architecture
 
@@ -23,4 +24,4 @@
 - Purchase parts on Amazon for buttons (don't get knobs yet)
 - Purchase cigar box(es)
 
-- looper.rb should parse routes.json
+- When starting Sonic Pi from the cli, it is failing to receive osc messages

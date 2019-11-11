@@ -12,7 +12,7 @@
 
 
 (defn halt! [sonic-pi-tool-path]
-  (sh/sh "bash" "-c" (str sonic-pi-tool-path "stop")))
+  (sh/sh "bash" "-c" (str sonic-pi-tool-path " stop")))
 
 
 ;; Start and stop a given script

@@ -1,4 +1,4 @@
-(ns app.core
+(ns app.core ;; TODO: Better ns name
   (:require
    [clojure.java.io :as io]
    [app.osc :as osc]

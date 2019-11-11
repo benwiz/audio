@@ -21,6 +21,7 @@
 # FIXME: There is a minor audible glitch when looping. I'm pretty
 # certain this is a microphone hardware issue.
 
+require 'json'
 require 'securerandom'
 
 
@@ -271,24 +272,31 @@ end
 ##|               |##
 #####################
 
-osc_commands = [
-  {message: "/osc/looper/kick",         fn: :kick},
-  {message: "/osc/looper/master",       fn: :master}
-  # {message: "/osc/looper/metronome-on", fn: :metronome_on},
-  # {message: "/osc/looper/metronome-off", fn: :metronome_off},
-  # {message: "/osc/looper/start",        fn: :start_record_audio},
-  # {message: "/osc/looper/stop",         fn: :stop_record_audio},
-  # {message: "/osc/looper/play",         fn: :play_audio},
-  # {message: "/osc/looper/pause",        fn: :pause_audio},
-  # {message: "/osc/looper/delete",       fn: :delete_buffers},
-]
+routes = JSON.parse(open("/Users/benwiz/code/guitar-looper/dsp/routes.json").read)["dsp"].map do |route|
+  {message: "/osc" + route["path"],
+   handler: route["handler"].to_sym}
+end
 
-osc_commands.each do |osc_command|
+puts "routes::", routes
+
+# routes = [
+#   {message: "/osc/looper/kick",         fn: :kick},
+#   {message: "/osc/looper/master",       fn: :master}
+#   # {message: "/osc/looper/metronome-on", fn: :metronome_on},
+#   # {message: "/osc/looper/metronome-off", fn: :metronome_off},
+#   # {message: "/osc/looper/start",        fn: :start_record_audio},
+#   # {message: "/osc/looper/stop",         fn: :stop_record_audio},
+#   # {message: "/osc/looper/play",         fn: :play_audio},
+#   # {message: "/osc/looper/pause",        fn: :pause_audio},
+#   # {message: "/osc/looper/delete",       fn: :delete_buffers},
+# ]
+
+routes.each do |route|
   in_thread do
-    live_loop osc_command[:fn] do
+    live_loop route[:handler] do
       use_real_time
-      sync osc_command[:message]
-      method(osc_command[:fn]).()
+      sync route[:message]
+      method(route[:handler]).()
     end
   end
 end
