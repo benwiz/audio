@@ -1,7 +1,7 @@
 (ns app.system
   (:require
-   [app.core :as app]
    [app.dsp :as dsp]
+   [app.http :as http]
    [app.osc :as osc]
    [clojure.core.async :as a]
    [clojure.edn :as edn]
@@ -21,6 +21,7 @@
    :dsp              {:routes (ig/ref :routes)
                       :sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
                       :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
+   :http             {}
    :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
@@ -30,7 +31,7 @@
                       :chan   (ig/ref :chan/dsp->app)}
    :osc/app->dsp     {:client (ig/ref :osc/client)
                       :chan   (ig/ref :chan/app->dsp)}
-   :app/dsp-msg-sink {:chan (ig/ref :chan/dsp->app)}})
+   :osc/dsp-msg-sink {:chan (ig/ref :chan/dsp->app)}})
 
 
 ;; ------------ Controls --------------------------
@@ -61,6 +62,12 @@
   [_ {:keys [sonic-pi-tool-path filepath]}]
   (prn "Init :dsp")
   (dsp/init! sonic-pi-tool-path filepath))
+
+
+(defmethod ig/init-key :http
+  [_ _]
+  (prn "Init :http")
+  (http/start-server))
 
 
 (defmethod ig/init-key :chan/dsp->app
@@ -99,10 +106,10 @@
   (osc/app->dsp client chan))
 
 
-(defmethod ig/init-key :app/dsp-msg-sink
+(defmethod ig/init-key :osc/dsp-msg-sink
   [_ {:keys [chan]}]
-  (prn "Init :app/dsp-dispatcher")
-  (app/dsp-msg-sink chan))
+  (prn "Init :osc/dsp-msg-sink")
+  (osc/dsp-msg-sink chan))
 
 
 ;; --------- Halt ---------------------------

@@ -8,7 +8,8 @@
                  [overtone/osc-clj "0.9.0"]
                  [metosin/reitit "0.3.9"]
                  [metosin/jsonista "0.2.5"]
-                 [integrant "0.7.0"]]
+                 [integrant "0.7.0"]
+                 [aleph "0.4.6"]]
   :main ^:skip-aot app.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

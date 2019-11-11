@@ -2,7 +2,9 @@
   (:require
    [clojure.core.async :refer [chan pub sub >!! <! go-loop]]
    [overtone.osc :as osc]
-   [clojure.java.io :as io]))
+   [clojure.java.io :as io]
+   [reitit.core :as r]
+   [clojure.edn :as edn]))
 
 
 (defn client [host port]
@@ -50,3 +52,29 @@
                     ;; WARNING: This is blocking without a receiver
                     (>!! in {:msg-type :osc
                              :msg      (select-keys msg [:path :args])}))))
+
+(def ^:private router
+  (r/router
+   (mapv (fn [[path {:keys [handler]}]]
+           [path {:handler @(requiring-resolve handler)}])
+         ;; TODO: Figure out how to use the integrant key :routes instead
+         ;; of re-reading routes.edn here
+         (-> "routes.edn" io/resource slurp edn/read-string :app))))
+
+
+(defn- route [path]
+  ;; TODO: Handle route not found (r will be nil)
+  (let [r       (r/match-by-path router path)
+        data    (:data r)
+        handler (:handler data)]
+    (handler)))
+
+
+(defn dsp-msg-sink [in]
+  (let [out (chan)
+        p   (pub in :msg-type)]
+    (sub p :osc out)
+    (go-loop []
+      (let [{:keys [msg-type msg]} (<! out)]
+        (route msg))
+      (recur))))

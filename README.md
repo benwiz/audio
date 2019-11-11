@@ -24,4 +24,6 @@
 - Purchase parts on Amazon for buttons (don't get knobs yet)
 - Purchase cigar box(es)
 
-- When starting Sonic Pi from the cli, it is failing to receive osc messages
+- Build a very simple React UI and listen for a button click, send http request to backend
+
+- When starting Sonic Pi from the cli, it is failing to receive osc messages. It is not a big deal to use the app until then.
