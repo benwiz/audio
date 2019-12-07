@@ -10,7 +10,8 @@
                  [metosin/jsonista "0.2.5"]
                  [integrant "0.7.0"]
                  [aleph "0.4.5"]
-                 [metosin/jsonista "0.2.5"]]
+                 [metosin/jsonista "0.2.5"]
+                 [byte-streams "0.2.5-alpha2"]]
   :main ^:skip-aot app.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

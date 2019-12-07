@@ -17,7 +17,11 @@
           :onKeyDown (fn [e]
                        (when (= 32 (.. e -keyCode)) ;; space
                          (js/console.log "hit" #_(.random js/Math))
-                         (.then (js/fetch "http://localhost:8080/")
+                         (.then (js/fetch "http://localhost:8080/"
+                                          #js{:method "POST"
+                                              :body (.stringify
+                                                     js/JSON
+                                                     {:message "/osc/looper/kick"})})
                                 (fn [response]
                                   (if-not (= 200 (.-status response))
                                     (js/console.log "Error!!"))
