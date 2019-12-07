@@ -9,7 +9,8 @@
                  [metosin/reitit "0.3.9"]
                  [metosin/jsonista "0.2.5"]
                  [integrant "0.7.0"]
-                 [aleph "0.4.6"]]
+                 [aleph "0.4.5"]
+                 [metosin/jsonista "0.2.5"]]
   :main ^:skip-aot app.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

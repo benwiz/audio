@@ -121,6 +121,13 @@
   (dsp/halt! sonic-pi-tool-path))
 
 
+(defmethod ig/halt-key! :http
+  [_ server]
+  (prn "Halt :http")
+  ;; NOTE: Don't worry about the warning, it is just a warning
+  (.close server))
+
+
 (defmethod ig/halt-key! :osc/server
   [_ server]
   (prn "Halt :osc/server")

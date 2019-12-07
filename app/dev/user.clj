@@ -12,7 +12,7 @@
 (defn stop []
   (system/halt! @s))
 
-#_(defn restart []
+(defn restart []
     (do
       (stop)
       (start)))
@@ -20,6 +20,7 @@
 (comment
   (start)
   (stop)
+  ;; TODO: Fix restart, idk why it doesn't work
   (restart)
 
   @s
