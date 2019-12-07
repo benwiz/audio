@@ -6,6 +6,7 @@
 2. Set `BuiltIn` for output
 3. Follow the logs with `./bin/sonic-pi-logs.sh`
 4. Start Sonic Pi server with `./bin/sonic-pi-start-server.sh`
+5. Start gui with `yarn watch` inside gui dir
 
 ## Architecture
 
@@ -27,3 +28,4 @@
 - Build a very simple React UI and listen for a button click, send http request to backend
 
 - When starting Sonic Pi from the cli, it is failing to receive osc messages. It is not a big deal to use the app until then.
+- Start gui with cider-jack-in-cljs, at some point
