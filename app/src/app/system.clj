@@ -21,7 +21,7 @@
    :dsp              {:routes (ig/ref :routes)
                       :sonic-pi-tool-path "./resources/sonic-pi-tool" ;; I have created a symlink here
                       :filepath           "./resources/dsp/looper.rb"} ;; I have created a symlink to the dsp dir here
-   :http             {}
+   :http             {:chan (ig/ref :chan/app->dsp)}
    :chan/dsp->app    {}
    :chan/app->dsp    {}
    :osc/server       {:port 9800}
@@ -65,9 +65,9 @@
 
 
 (defmethod ig/init-key :http
-  [_ _]
+  [_ config]
   (prn "Init :http")
-  (http/start-server))
+  (http/start-server config))
 
 
 (defmethod ig/init-key :chan/dsp->app

@@ -277,11 +277,11 @@ routes = JSON.parse(open("/Users/benwiz/code/guitar-looper/dsp/routes.json").rea
    handler: route["handler"].to_sym}
 end
 
-puts "routes::", routes
+# puts "routes::", routes
 
 # routes = [
-#   {message: "/osc/looper/kick",         fn: :kick},
-#   {message: "/osc/looper/master",       fn: :master}
+#   {message: "/osc/looper/kick",         handler: :kick},
+#   {message: "/osc/looper/master",       handler: :master}
 #   # {message: "/osc/looper/metronome-on", fn: :metronome_on},
 #   # {message: "/osc/looper/metronome-off", fn: :metronome_off},
 #   # {message: "/osc/looper/start",        fn: :start_record_audio},

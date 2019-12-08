@@ -20,8 +20,12 @@
 (comment
   (start)
   (stop)
-  ;; TODO: Fix restart, idk why it doesn't work
+  ;; TODO: Fix restart, idk why it doesn't work. Starting and stopping also needs to be more robust and fail better.
   (restart)
+
+  ;; NOTE: Don't forget to start the sonic pi server
+  ;; actually, osc is not working without the gui
+  ;; `sonic-pi-tool start-server`
 
   @s
   (keys @s)
