@@ -13,10 +13,11 @@
                       j/read-value
                       (get "arr")
                       second)]
+      (prn "handler.message::" message)
       ;; Send message
       (>!! chan
            {:msg-type :osc
-            :msg      "/looper/kick"})
+            :msg      message})
       ;; http response
       {:status  200
        :headers {"content-type"                 "application/json"

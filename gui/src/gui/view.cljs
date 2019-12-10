@@ -6,24 +6,30 @@
    [clojure.string :as str]))
 
 (def style
-  #js{:height          "500px"
+  #js{:height          "250px"
       :width           "100%"
-      :backgroundColor "#FFDDDD"})
+      :backgroundColor "#FFDDDD"
+      :margin "20px"})
 
-(defn app []
+(defn trigger [message]
   (d/div {:style     style
           :className "pressed"
           :tabIndex  "1"
           :onKeyDown (fn [e]
                        (when (= 32 (.. e -keyCode)) ;; space
-                         (js/console.log "hit" #_(.random js/Math))
+                         (js/console.log message)
                          (.then (js/fetch "http://localhost:8080/"
                                           #js{:method "POST"
                                               :body (.stringify
                                                      js/JSON
-                                                     {:message "/osc/looper/kick"})})
+                                                     {:message message})})
                                 (fn [response]
-                                  (if-not (= 200 (.-status response))
+                                  (when-not (= 200 (.-status response))
                                     (js/console.log "Error!!"))
-                                  (js/console.log response)))))}
-         "Click this this box to start (this text wont change). Then press SPACE to trigger an osc command."))
+                                  #_(js/console.log response)))))}
+         message))
+
+(defn app []
+  (d/div nil
+         (trigger "/looper/kick")
+         (trigger "/looper/master")))
