@@ -88,8 +88,9 @@ fn main() -> Result<(), failure::Error> {
     });
 
     // Run for 3 seconds before closing.
-    println!("Playing for 20 seconds... ");
-    std::thread::sleep(std::time::Duration::from_secs(20));
+    // println!("Playing for 20 seconds... ");
+    // std::thread::sleep(std::time::Duration::from_secs(20));
+    std::thread::sleep(std::time::Duration::new(std::u64::MAX, 0));
     println!("Done!");
     Ok(())
 }
