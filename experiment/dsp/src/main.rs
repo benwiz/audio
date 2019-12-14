@@ -13,7 +13,7 @@ fn main() -> Result<(), failure::Error> {
     println!("Devices:");
     let devices = host.devices()?;
     for (device_index, device) in devices.enumerate() {
-        println!("  {}. \"{}\"", device_index + 1, device.name()?);
+        println!("  {}. \"{}\"", device_index, device.name()?);
     }
 
     // Default devices.
