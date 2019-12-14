@@ -87,7 +87,7 @@ fn main() -> Result<(), failure::Error> {
         });
     });
 
-    // Run for 3 seconds before closing.
+    // Run for MAX seconds before closing.
     let seconds = std::u64::MAX;
     println!("Playing for {} seconds... ", seconds);
     std::thread::sleep(std::time::Duration::new(seconds, 0));
