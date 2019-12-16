@@ -78,7 +78,7 @@ fn looper() -> Result<(), failure::Error> {
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    // added this block for writing to file
+                    // Write to file
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
                         if let Ok(mut guard) = writer_2.try_lock() {
                             if let Some(writer) = guard.as_mut() {
@@ -89,6 +89,7 @@ fn looper() -> Result<(), failure::Error> {
                         }
                     }
 
+                    // Write to output stream
                     for &sample in buffer.iter() {
                         if tx.try_send(sample).is_err() {
                             output_fell_behind = true;
