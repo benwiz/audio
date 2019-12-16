@@ -105,6 +105,23 @@ fn looper() -> Result<(), failure::Error> {
     Ok(())
 }
 
+fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
+    match format {
+        cpal::SampleFormat::U16 => hound::SampleFormat::Int,
+        cpal::SampleFormat::I16 => hound::SampleFormat::Int,
+        cpal::SampleFormat::F32 => hound::SampleFormat::Float,
+    }
+}
+
+fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
+    hound::WavSpec {
+        channels: format.channels as _,
+        sample_rate: format.sample_rate.0 as _,
+        bits_per_sample: (format.data_type.sample_size() * 8) as _,
+        sample_format: sample_format(format.data_type),
+    }
+}
+
 #[get("/trigger")]
 fn trigger() -> String {
     format!("hi {}", 2)
