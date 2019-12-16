@@ -1,7 +1,8 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-extern crate cpal;
 extern crate failure;
+extern crate cpal;
+extern crate hound;
 #[macro_use] extern crate rocket;
 
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
@@ -52,6 +53,15 @@ fn looper() -> Result<(), failure::Error> {
     event_loop.play_stream(input_stream_id.clone())?;
     event_loop.play_stream(output_stream_id.clone())?;
 
+    // The WAV file we're recording to.
+    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+    let spec = wav_spec_from_format(&format);
+    let writer = hound::WavWriter::create(PATH, spec)?;
+    let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
+    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let writer_2 = writer.clone();
+    let recording_2 = recording.clone();
+
     // Run the event loop on a separate thread.
     std::thread::spawn(move || {
         event_loop.run(move |id, result| {
@@ -67,6 +77,18 @@ fn looper() -> Result<(), failure::Error> {
                 cpal::StreamData::Input { buffer: cpal::UnknownTypeInputBuffer::F32(buffer) } => {
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
+
+                    // added this block for writing to file
+                    if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
+                        if let Ok(mut guard) = writer_2.try_lock() {
+                            if let Some(writer) = guard.as_mut() {
+                                for &sample in buffer.iter() {
+                                    writer.write_sample(sample).ok();
+                                }
+                            }
+                        }
+                    }
+
                     for &sample in buffer.iter() {
                         if tx.try_send(sample).is_err() {
                             output_fell_behind = true;
@@ -98,9 +120,11 @@ fn looper() -> Result<(), failure::Error> {
     });
 
     // Run for MAX seconds before closing.
-    let seconds = std::u64::MAX;
-    println!("Playing for {} seconds... ", seconds);
+    let seconds = 5; // std::u64::MAX;
+    println!("Play and record for {} seconds... ", seconds);
     std::thread::sleep(std::time::Duration::new(seconds, 0));
+    recording.store(false, std::sync::atomic::Ordering::Relaxed);
+    writer.lock().unwrap().take().unwrap().finalize()?;
     println!("Done!");
     Ok(())
 }
@@ -127,6 +151,12 @@ fn trigger() -> String {
     format!("hi {}", 2)
 }
 
-fn main() {
+fn server() {
     rocket::ignite().mount("/", routes![trigger]).launch();
+}
+
+
+fn main() {
+    // server();
+    looper();
 }
