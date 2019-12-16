@@ -78,6 +78,8 @@ fn looper() -> Result<(), failure::Error> {
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
+                    // TODO: Need to figure out how to modify `recording` from the http function
+
                     // Write to file
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
                         if let Ok(mut guard) = writer_2.try_lock() {
