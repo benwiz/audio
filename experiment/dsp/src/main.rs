@@ -1,11 +1,15 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
 extern crate cpal;
 extern crate failure;
+
+#[macro_use] extern crate rocket;
 
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
 const LATENCY_MS: f32 = 10.0;
 
-fn main() -> Result<(), failure::Error> {
+fn looper() -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
 
@@ -100,4 +104,13 @@ fn main() -> Result<(), failure::Error> {
     std::thread::sleep(std::time::Duration::new(seconds, 0));
     println!("Done!");
     Ok(())
+}
+
+#[get("/hello/<name>/<age>")]
+fn hello(name: String, age: u8) -> String {
+    format!("Hello, {} year old named {}!", age, name)
+}
+
+fn main() {
+    rocket::ignite().mount("/", routes![hello]).launch();
 }

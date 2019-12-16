@@ -18,7 +18,7 @@
           :onKeyDown (fn [e]
                        (when (= 32 (.. e -keyCode)) ;; space
                          (js/console.log message)
-                         (.then (js/fetch "http://localhost:8080/"
+                         (.then (js/fetch "http://localhost:8000/" ;; rust's rocket default port is 8000 not 8080
                                           #js{:method "POST"
                                               :body (.stringify
                                                      js/JSON
