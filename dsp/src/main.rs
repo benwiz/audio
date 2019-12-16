@@ -79,6 +79,8 @@ fn looper() -> Result<(), failure::Error> {
                     let mut output_fell_behind = false;
 
                     // TODO: Need to figure out how to modify `recording` from the http function
+                    // I probably need to create the recording var in the main fn and pass it into
+                    // all relevant functions.
 
                     // Write to file
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
