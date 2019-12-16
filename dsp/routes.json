@@ -1,1 +1,0 @@
-{"app":[["/app/tick",{"handler":"app.handlers/tick"}]],"dsp":[{"path":"/looper/kick","handler":"kick","doc":"Make a kick drum sound"},{"path":"/looper/master","handler":"master","doc":"The master command gives the dsp control. One button to start, stop, then delete."}]}
