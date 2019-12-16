@@ -2,7 +2,6 @@
 
 extern crate cpal;
 extern crate failure;
-
 #[macro_use] extern crate rocket;
 
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
@@ -106,11 +105,11 @@ fn looper() -> Result<(), failure::Error> {
     Ok(())
 }
 
-#[get("/hello/<name>/<age>")]
-fn hello(name: String, age: u8) -> String {
-    format!("Hello, {} year old named {}!", age, name)
+#[get("/trigger")]
+fn trigger() -> String {
+    format!("hi {}", 2)
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![hello]).launch();
+    rocket::ignite().mount("/", routes![trigger]).launch();
 }

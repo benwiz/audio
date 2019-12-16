@@ -18,11 +18,11 @@
           :onKeyDown (fn [e]
                        (when (= 32 (.. e -keyCode)) ;; space
                          (js/console.log message)
-                         (.then (js/fetch "http://localhost:8000/" ;; rust's rocket default port is 8000 not 8080
-                                          #js{:method "POST"
-                                              :body (.stringify
-                                                     js/JSON
-                                                     {:message message})})
+                         (.then (js/fetch "http://localhost:8000/trigger"
+                                          #_#js{:method "POST"
+                                                :body   (.stringify
+                                                         js/JSON
+                                                         {:message message})})
                                 (fn [response]
                                   (when-not (= 200 (.-status response))
                                     (js/console.log "Error!!"))
@@ -32,4 +32,4 @@
 (defn app []
   (d/div nil
          (trigger "/looper/kick")
-         (trigger "/looper/master")))
+         #_(trigger "/looper/master")))
