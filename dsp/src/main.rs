@@ -9,7 +9,7 @@ use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
 const LATENCY_MS: f32 = 10.0;
 
-fn looper() -> Result<(), failure::Error> {
+fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
 
@@ -58,7 +58,7 @@ fn looper() -> Result<(), failure::Error> {
     let spec = wav_spec_from_format(&format);
     let writer = hound::WavWriter::create(PATH, spec)?;
     let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
-    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
+    // let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
     let writer_2 = writer.clone();
     let recording_2 = recording.clone();
 
@@ -162,6 +162,9 @@ fn server() {
 
 
 fn main() {
+    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let recording_clone = recording.clone();
+
+    looper(recording_clone);
     // server();
-    looper();
 }
