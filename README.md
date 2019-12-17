@@ -17,14 +17,18 @@
      - not recording && recording.wav does not exist
        - start recording
 - playback loop (make this a part of main loop, for now)
-  - case
-    - not recording && recording.wav exists
-      - play recording.wav
-    - recording
-      - stop playback
+  - notes
+    - start of using rodio because it provides a lot of nice options, only if it doesn't work nicely try to implement directly using Hount and CPAL (should not be too bad since I can look at Rodio source code)
+  - logic
+    - case
+      - not recording && recording.wav exists
+        - play recording.wav
+      - recording
+        - stop playback
       
 ## To Do Later
 
 - Metronome
 - Metronome sync
 - Multiple loop playback
+- Can I use in-memory wav files? Is that even necessary?
