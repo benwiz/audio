@@ -82,7 +82,7 @@ fn looper() -> Result<(), failure::Error> {
                     // I probably need to create the recording var in the main fn and pass it into
                     // all relevant functions.
 
-                    // Write to file
+                    // Write to file (NOTE: iterating through the buffer 2x is not ideal)
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
                         if let Ok(mut guard) = writer_2.try_lock() {
                             if let Some(writer) = guard.as_mut() {
