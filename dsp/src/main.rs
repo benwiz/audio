@@ -152,8 +152,7 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 }
 
 #[get("/trigger")]
-fn trigger(recording: rocket::State<RecordingStatus>) -> String {
-    println!("hiii");
+fn trigger(recording: rocket::State<std::sync::Arc<RecordingStatus>>) -> String {
     format!("hi from trigger {:?}", recording.0.load(std::sync::atomic::Ordering::Relaxed))
 }
 
