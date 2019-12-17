@@ -78,9 +78,7 @@ fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<()
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    // TODO: Need to figure out how to modify `recording` from the http function
-                    // I probably need to create the recording var in the main fn and pass it into
-                    // all relevant functions.
+                    println!("recording: {:?}", recording_2);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
@@ -162,9 +160,12 @@ fn server() {
 
 
 fn main() {
-    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let recording_clone = recording.clone();
 
-    looper(recording_clone);
-    // server();
+    std::thread::spawn(move || {
+        looper(recording_clone);
+    });
+
+    server();
 }
