@@ -80,10 +80,11 @@ fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Err
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    // println!("recording: {:?}", recording_2);
+                    let recording_status = recording_2.0.load(std::sync::atomic::Ordering::Relaxed);
+                    // println!("recording: {:?}", recording_status);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
-                    if recording_2.0.load(std::sync::atomic::Ordering::Relaxed) {
+                    if recording_status {
                         if let Ok(mut guard) = writer_2.try_lock() {
                             if let Some(writer) = guard.as_mut() {
                                 for &sample in buffer.iter() {
@@ -153,7 +154,10 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 
 #[get("/trigger")]
 fn trigger(recording: rocket::State<std::sync::Arc<RecordingStatus>>) -> String {
-    format!("hi from trigger {:?}", recording.0.load(std::sync::atomic::Ordering::Relaxed))
+    let curr_recording = recording.0.load(std::sync::atomic::Ordering::Relaxed);
+    let new_recording = !curr_recording;
+    recording.0.store(new_recording, std::sync::atomic::Ordering::Relaxed);
+    format!("set recording status to: {:?}", new_recording)
 }
 
 fn server(recording: std::sync::Arc<RecordingStatus>) {
