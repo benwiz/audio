@@ -7,7 +7,7 @@ extern crate hound;
 
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
-const LATENCY_MS: f32 = 10.0;
+const LATENCY_MS: f32 = 20.0;
 
 fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
@@ -78,7 +78,7 @@ fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<()
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    println!("recording: {:?}", recording_2);
+                    // println!("recording: {:?}", recording_2);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
                     if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
@@ -149,23 +149,30 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
     }
 }
 
+struct RecordingStatus(std::sync::atomic::AtomicBool);
+
 #[get("/trigger")]
-fn trigger() -> String {
-    format!("hi {}", 2)
+fn trigger(recording: rocket::State<RecordingStatus>) -> String {
+    println!("hiii");
+    format!("hi from trigger {:?}", recording.0)
 }
 
-fn server() {
-    rocket::ignite().mount("/", routes![trigger]).launch();
+fn server(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) {
+    rocket::ignite()
+        .manage(recording)
+        .mount("/", routes![trigger])
+        .launch();
 }
 
 
 fn main() {
     let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let recording_clone = recording.clone();
+    let recording_clone_1 = recording.clone();
+    let recording_clone_2 = recording.clone();
 
     std::thread::spawn(move || {
-        looper(recording_clone);
+        looper(recording_clone_1);
     });
 
-    server();
+    server(recording_clone_2);
 }
