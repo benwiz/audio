@@ -32,3 +32,4 @@
 - Metronome sync
 - Multiple loop playback
 - Can I use in-memory wav files? Is that even necessary?
+  - Maybe it makes sense to try this out before I add multi loop playback to see if there is any noticable speed difference
