@@ -167,11 +167,10 @@ fn server(recording: std::sync::Arc<RecordingStatus>) {
 
 fn main() {
     let recording = std::sync::Arc::new(RecordingStatus(std::sync::atomic::AtomicBool::new(false)));
-    let recording_clone_1 = recording.clone();
-    let recording_clone_2 = recording.clone();
+    let recording_clone = recording.clone();
 
     std::thread::spawn(move || {
-        looper(recording_clone_1);
+        looper(recording_clone);
     });
 
     server(recording);
