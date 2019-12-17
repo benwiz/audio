@@ -21,4 +21,10 @@
     - not recording && recording.wav exists
       - play recording.wav
     - recording
-      - stop playback.wav
+      - stop playback
+      
+## To Do Later
+
+- Metronome
+- Metronome sync
+- Multiple loop playback
