@@ -11,7 +11,7 @@ const LATENCY_MS: f32 = 20.0;
 
 struct RecordingStatus(std::sync::atomic::AtomicBool);
 
-fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<(), failure::Error> {
+fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
 
@@ -83,7 +83,7 @@ fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<()
                     // println!("recording: {:?}", recording_2);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
-                    if recording_2.load(std::sync::atomic::Ordering::Relaxed) {
+                    if recording_2.0.load(std::sync::atomic::Ordering::Relaxed) {
                         if let Ok(mut guard) = writer_2.try_lock() {
                             if let Some(writer) = guard.as_mut() {
                                 for &sample in buffer.iter() {
@@ -157,7 +157,7 @@ fn trigger(recording: rocket::State<RecordingStatus>) -> String {
     format!("hi from trigger {:?}", recording.0)
 }
 
-fn server(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) {
+fn server(recording: std::sync::Arc<RecordingStatus>) {
     rocket::ignite()
         .manage(recording)
         .mount("/", routes![trigger])
@@ -166,7 +166,7 @@ fn server(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) {
 
 
 fn main() {
-    let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let recording = std::sync::Arc::new(RecordingStatus(std::sync::atomic::AtomicBool::new(false)));
     let recording_clone_1 = recording.clone();
     let recording_clone_2 = recording.clone();
 
@@ -174,5 +174,5 @@ fn main() {
         looper(recording_clone_1);
     });
 
-    server(recording_clone_2);
+    server(recording);
 }
