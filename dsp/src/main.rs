@@ -9,6 +9,8 @@ use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
 const LATENCY_MS: f32 = 20.0;
 
+struct RecordingStatus(std::sync::atomic::AtomicBool);
+
 fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
@@ -123,11 +125,11 @@ fn looper(recording: std::sync::Arc<std::sync::atomic::AtomicBool>) -> Result<()
     });
 
     // Run for MAX seconds before closing.
-    let seconds = 5; // std::u64::MAX;
-    println!("Play and record for {} seconds... ", seconds);
+    let seconds = std::u64::MAX;
+    println!("Start audio processor (run for {} seconds)", seconds);
     std::thread::sleep(std::time::Duration::new(seconds, 0));
-    recording.store(false, std::sync::atomic::Ordering::Relaxed);
-    writer.lock().unwrap().take().unwrap().finalize()?;
+    // recording.store(false, std::sync::atomic::Ordering::Relaxed);
+    writer.lock().unwrap().take().unwrap().finalize()?; // TODO: Will need to call this when I stop recording, I think.
     println!("Done!");
     Ok(())
 }
@@ -148,8 +150,6 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
         sample_format: sample_format(format.data_type),
     }
 }
-
-struct RecordingStatus(std::sync::atomic::AtomicBool);
 
 #[get("/trigger")]
 fn trigger(recording: rocket::State<RecordingStatus>) -> String {
