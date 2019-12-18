@@ -159,7 +159,8 @@ fn trigger(recording: rocket::State<std::sync::Arc<RecordingStatus>>) -> String 
     let curr_recording = recording.0.load(std::sync::atomic::Ordering::Relaxed);
     let new_recording = !curr_recording;
     recording.0.store(new_recording, std::sync::atomic::Ordering::Relaxed);
-    format!("set recording status to: {:?}", new_recording)
+
+    format!("success, I need a better message here")
 }
 
 fn server(recording: std::sync::Arc<RecordingStatus>) {

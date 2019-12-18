@@ -7,13 +7,15 @@
 
 ## To Do
 
-- on start, remove all recordings
+- on boot
+  - store the count of recordings in the RecordingStatus state
+  - update this as they are removed or added, don't do a file system operation again
 - on trigger
   - case
     - recording
       - stop recording
      - not recording && recording.wav exists
-     - delete recording.wav
+       - delete recording.wav
      - not recording && recording.wav does not exist
        - start recording
 - playback loop (make this a part of main loop, for now)
