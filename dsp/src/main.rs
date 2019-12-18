@@ -8,15 +8,18 @@ extern crate hound;
 use std::fs;
 use std::io::Error;
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
+use rocket::State;
+use std::sync::Arc;
+use std::sync::atomic::{Ordering, AtomicBool, AtomicI32};
 
 const LATENCY_MS: f32 = 20.0;
 
 struct RecordingStatus {
-    status: std::sync::atomic::AtomicBool,
-    count: std::sync::atomic::AtomicI32,
+    status: AtomicBool,
+    count: AtomicI32,
 }
 
-fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Error> {
+fn looper(recording: Arc<RecordingStatus>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
 
@@ -155,25 +158,35 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
     }
 }
 
+// NOTE: Everything about this function seems inefficient
 #[get("/trigger")]
-fn trigger(recording: rocket::State<std::sync::Arc<RecordingStatus>>) -> String {
-    let response = match recording {
-        RecordingStatus { status: true, .. } => {
-            let curr_status = recording.status.load(std::sync::atomic::Ordering::Relaxed);
+fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
+    let curr_status = recording.status.load(std::sync::atomic::Ordering::Relaxed);
+    let curr_count = recording.count.load(std::sync::atomic::Ordering::Relaxed);
+    let curr_recording_status = RecordingStatus {
+        status: AtomicBool::new(curr_status),
+        count: AtomicI32::new(curr_count),
+    };
+
+    let atomic_true = AtomicBool::new(true);
+    let atomic_false = AtomicBool::new(false);
+    let atomic_zero = AtomicI32::new(0);
+
+    let response = match curr_recording_status {
+        RecordingStatus { status: atomic_true, .. } => {
             let new_status = !curr_status;
-            recording.status.store(new_status, std::sync::atomic::Ordering::Relaxed);
+            recording.status.store(new_status, Ordering::Relaxed);
             // TODO: stop recording
             "stop recording"
         },
-        RecordingStatus { status: false, count: 0 } => {
-            let curr_count = recording.status.load(std::sync::atomic::Ordering::Relaxed);
+        RecordingStatus { status: atomic_false, count: atomic_zero } => {
             let new_count = curr_count + 1;
-            recording.count.store(new_count, std::sync::atomic::Ordering::Relaxed);
+            recording.count.store(new_count, Ordering::Relaxed);
             "start new recording"
         },
-        RecordingStatus { status: false, .. } => {
+        RecordingStatus { status: atomic_false, .. } => {
             let new_count = 0;
-            recording.count.store(new_count, std::sync::atomic::Ordering::Relaxed);
+            recording.count.store(new_count, Ordering::Relaxed);
             "delete recording"
         }
     };
