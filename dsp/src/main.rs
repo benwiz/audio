@@ -15,12 +15,12 @@ use std::sync::atomic::{Ordering, AtomicBool, AtomicI32};
 const LATENCY_MS: f32 = 20.0;
 const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
 
-struct RecordingStatus {
+struct AppState {
     status: AtomicBool,
     count: AtomicI32,
 }
 
-fn looper(recording: Arc<RecordingStatus>) -> Result<(), failure::Error> {
+fn looper(app_state: Arc<AppState>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
     let event_loop = host.event_loop();
 
@@ -69,9 +69,8 @@ fn looper(recording: Arc<RecordingStatus>) -> Result<(), failure::Error> {
     let spec = wav_spec_from_format(&format);
     let writer = hound::WavWriter::create(FILEPATH, spec)?;
     let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
-    // let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
     let writer_2 = writer.clone();
-    let recording_2 = recording.clone();
+    let app_state_clone = app_state.clone();
 
     // Run the event loop on a separate thread.
     std::thread::spawn(move || {
@@ -89,7 +88,7 @@ fn looper(recording: Arc<RecordingStatus>) -> Result<(), failure::Error> {
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    let recording_status = recording_2.status.load(std::sync::atomic::Ordering::Relaxed);
+                    let recording_status = app_state_clone.status.load(Ordering::Relaxed);
                     // println!("recording: {:?}", recording_status);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
@@ -161,29 +160,29 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 
 // NOTE: Everything about this function seems inefficient
 #[get("/trigger")]
-fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
-    let curr_status = recording.status.load(Ordering::Relaxed);
-    let curr_count = recording.count.load(Ordering::Relaxed);
+fn trigger(app_state: State<Arc<AppState>>) -> String {
+    let curr_status = app_state.status.load(Ordering::Relaxed);
+    let curr_count = app_state.count.load(Ordering::Relaxed);
 
     println!("current status: {}", curr_status);
     println!("current count: {}", curr_count);
 
     let response = match curr_status {
         true => {
-            recording.status.store(false, Ordering::Relaxed);
+            app_state.status.store(false, Ordering::Relaxed);
             // TODO: stop recording
             "stop recording"
         },
         false => {
             match curr_count {
                 0 => {
-                    recording.status.store(true, Ordering::Relaxed);
+                    app_state.status.store(true, Ordering::Relaxed);
                     let new_count = curr_count + 1;
-                    recording.count.store(new_count, Ordering::Relaxed);
+                    app_state.count.store(new_count, Ordering::Relaxed);
                     "start new recording"
                 },
                 _ => {
-                    recording.count.store(0, Ordering::Relaxed);
+                    app_state.count.store(0, Ordering::Relaxed);
                     "delete recordings"
                 },
             }
@@ -193,9 +192,9 @@ fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
     format!("{}", response)
 }
 
-fn server(recording: std::sync::Arc<RecordingStatus>) {
+fn server(app_state: Arc<AppState>) {
     rocket::ignite()
-        .manage(recording)
+        .manage(app_state)
         .mount("/", routes![trigger])
         .launch();
 }
@@ -228,16 +227,16 @@ fn main() {
     let recordings_dir = fs::read_dir(PATH);
     delete_dir_contents(recordings_dir);
 
-    // Initialize recording boolean
-    let recording = Arc::new(RecordingStatus{
+    // Initialize app state
+    let app_state = Arc::new(AppState {
         status: AtomicBool::new(false),
         count: AtomicI32::new(0),
     });
-    let recording_clone = recording.clone();
+    let app_state_clone = app_state.clone();
 
     std::thread::spawn(move || {
-        looper(recording_clone).expect("Error running looper");
+        looper(app_state_clone).expect("Error running looper");
     });
 
-    server(recording);
+    server(app_state);
 }
