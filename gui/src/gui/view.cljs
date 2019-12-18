@@ -2,7 +2,7 @@
   (:require
    ["react" :as react]
    [crinkle.dom :as d]
-   [crinkle.component :refer [CE RE fragment keyed-fragment]]
+   [crinkle.component :refer [CE RE]]
    [clojure.string :as str]))
 
 (def style
@@ -31,5 +31,5 @@
 
 (defn app []
   (d/div nil
-         (trigger "/looper/kick")
-         #_(trigger "/looper/master")))
+         (CE trigger "/looper/kick")
+         #_(CE trigger "/looper/master")))
