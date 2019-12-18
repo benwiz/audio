@@ -11,7 +11,10 @@ use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
 const LATENCY_MS: f32 = 20.0;
 
-struct RecordingStatus(std::sync::atomic::AtomicBool);
+struct RecordingStatus {
+    status: std::sync::atomic::AtomicBool,
+    count: std::sync::atomic::AtomicI32,
+}
 
 fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Error> {
     let host = cpal::default_host();
@@ -58,7 +61,7 @@ fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Err
     event_loop.play_stream(output_stream_id.clone())?;
 
     // The WAV file we're recording to.
-    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/recorded.wav");
+    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/0.wav");
     let spec = wav_spec_from_format(&format);
     let writer = hound::WavWriter::create(PATH, spec)?;
     let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
@@ -82,7 +85,7 @@ fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Err
                     assert_eq!(id, input_stream_id);
                     let mut output_fell_behind = false;
 
-                    let recording_status = recording_2.0.load(std::sync::atomic::Ordering::Relaxed);
+                    let recording_status = recording_2.status.load(std::sync::atomic::Ordering::Relaxed);
                     // println!("recording: {:?}", recording_status);
 
                     // Write to file (NOTE: iterating through the buffer 2x is not ideal)
@@ -127,13 +130,11 @@ fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Err
         });
     });
 
-    // Run for MAX seconds before closing.
+    // Run for MAX seconds before closing (basically, forever)
     let seconds = std::u64::MAX;
     println!("Start audio processor (run for {} seconds)", seconds);
     std::thread::sleep(std::time::Duration::new(seconds, 0));
-    // recording.store(false, std::sync::atomic::Ordering::Relaxed);
-    writer.lock().unwrap().take().unwrap().finalize()?; // TODO: Will need to call this when I stop recording, I think.
-    println!("Done!");
+    writer.lock().unwrap().take().unwrap().finalize()?; // TODO: Will need to call this when I stop recording, I think. That means writer probably has to go in the RecordingStatus which is a badly named global state.
     Ok(())
 }
 
@@ -156,11 +157,28 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 
 #[get("/trigger")]
 fn trigger(recording: rocket::State<std::sync::Arc<RecordingStatus>>) -> String {
-    let curr_recording = recording.0.load(std::sync::atomic::Ordering::Relaxed);
-    let new_recording = !curr_recording;
-    recording.0.store(new_recording, std::sync::atomic::Ordering::Relaxed);
+    let response = match recording {
+        RecordingStatus { status: true, .. } => {
+            let curr_status = recording.status.load(std::sync::atomic::Ordering::Relaxed);
+            let new_status = !curr_status;
+            recording.status.store(new_status, std::sync::atomic::Ordering::Relaxed);
+            // TODO: stop recording
+            "stop recording"
+        },
+        RecordingStatus { status: false, count: 0 } => {
+            let curr_count = recording.status.load(std::sync::atomic::Ordering::Relaxed);
+            let new_count = curr_count + 1;
+            recording.count.store(new_count, std::sync::atomic::Ordering::Relaxed);
+            "start new recording"
+        },
+        RecordingStatus { status: false, .. } => {
+            let new_count = 0;
+            recording.count.store(new_count, std::sync::atomic::Ordering::Relaxed);
+            "delete recording"
+        }
+    };
 
-    format!("success, I need a better message here")
+    format!("{}", response)
 }
 
 fn server(recording: std::sync::Arc<RecordingStatus>) {
@@ -200,7 +218,10 @@ fn main() {
     delete_dir_contents(recordings_dir);
 
     // Initialize recording boolean
-    let recording = std::sync::Arc::new(RecordingStatus(std::sync::atomic::AtomicBool::new(false)));
+    let recording = std::sync::Arc::new(RecordingStatus{
+        status: std::sync::atomic::AtomicBool::new(false),
+        count: std::sync::atomic::AtomicI32::new(0),
+    });
     let recording_clone = recording.clone();
 
     std::thread::spawn(move || {
