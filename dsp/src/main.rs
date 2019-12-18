@@ -172,8 +172,10 @@ fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
     let atomic_false = AtomicBool::new(false);
     let atomic_zero = AtomicI32::new(0);
 
+    println!("current status: {} {}", curr_status, curr_count);
+
     let response = match curr_recording_status {
-        RecordingStatus { status: atomic_true, .. } => {
+        RecordingStatus { status: atomic_true, count: _ } => {
             let new_status = !curr_status;
             recording.status.store(new_status, Ordering::Relaxed);
             // TODO: stop recording
@@ -184,7 +186,7 @@ fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
             recording.count.store(new_count, Ordering::Relaxed);
             "start new recording"
         },
-        RecordingStatus { status: atomic_false, .. } => {
+        RecordingStatus { status: atomic_false, count: _ } => {
             let new_count = 0;
             recording.count.store(new_count, Ordering::Relaxed);
             "delete recording"
