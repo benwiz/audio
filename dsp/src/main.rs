@@ -203,7 +203,7 @@ fn main() {
     let recording_clone = recording.clone();
 
     std::thread::spawn(move || {
-        looper(recording_clone);
+        looper(recording_clone).expect("Error running looper");
     });
 
     server(recording);
