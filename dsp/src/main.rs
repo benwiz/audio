@@ -170,20 +170,20 @@ fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
 
     let response = match curr_status {
         true => {
-            recording.status.store(AtomicBool::new(false), Ordering::Relaxed);
+            recording.status.store(false, Ordering::Relaxed);
             // TODO: stop recording
             "stop recording"
         },
         false => {
             match curr_count {
                 0 => {
-                    recording.status.store(AtomicBool::(true), Ordering::Relaxed);
+                    recording.status.store(true, Ordering::Relaxed);
                     let new_count = curr_count + 1;
-                    recording.count.store(AtomicI32::(new_count), Ordering::Relaxed);
+                    recording.count.store(new_count, Ordering::Relaxed);
                     "start new recording"
                 },
                 _ => {
-                    recording.count.store(AtomicI32::(0), Ordering::Relaxed);
+                    recording.count.store(0, Ordering::Relaxed);
                     "delete recordings"
                 },
             }
