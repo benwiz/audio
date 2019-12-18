@@ -137,7 +137,7 @@ fn looper(app_state: Arc<AppState>) -> Result<(), failure::Error> {
     let seconds = std::u64::MAX;
     println!("Start audio processor (run for {} seconds)", seconds);
     std::thread::sleep(std::time::Duration::new(seconds, 0));
-    writer.lock().unwrap().take().unwrap().finalize()?; // TODO: Will need to call this when I stop recording, I think. That means writer probably has to go in the RecordingStatus which is a badly named global state.
+    writer.lock().unwrap().take().unwrap().finalize()?; // TODO: Will need to call this when I stop recording, I think. That means writer probably has to go in the AppState
     Ok(())
 }
 
