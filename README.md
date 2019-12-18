@@ -13,7 +13,7 @@
     - recording
       - stop recording
      - not recording && recording.wav exists
-       - delete recording.wav
+     - delete recording.wav
      - not recording && recording.wav does not exist
        - start recording
 - playback loop (make this a part of main loop, for now)
@@ -25,7 +25,7 @@
         - play recording.wav
       - recording
         - stop playback
-      
+
 ## To Do Later
 
 - Metronome

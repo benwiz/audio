@@ -5,6 +5,8 @@ extern crate cpal;
 extern crate hound;
 #[macro_use] extern crate rocket;
 
+use std::fs;
+use std::io::Error;
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 
 const LATENCY_MS: f32 = 20.0;
@@ -56,7 +58,7 @@ fn looper(recording: std::sync::Arc<RecordingStatus>) -> Result<(), failure::Err
     event_loop.play_stream(output_stream_id.clone())?;
 
     // The WAV file we're recording to.
-    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/recorded.wav");
     let spec = wav_spec_from_format(&format);
     let writer = hound::WavWriter::create(PATH, spec)?;
     let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
@@ -167,8 +169,36 @@ fn server(recording: std::sync::Arc<RecordingStatus>) {
         .launch();
 }
 
+fn create_dir(path: &'static str) {
+    fs::create_dir_all(path).expect("Failed to create dir");
+}
+
+fn delete_dir_contents(read_dir_res: Result<fs::ReadDir, Error>) {
+    if let Ok(dir) = read_dir_res {
+        for entry in dir {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if path.is_dir() {
+                    fs::remove_dir_all(path).expect("Failed to remove a dir");
+                } else {
+                    fs::remove_file(path).expect("Failed to remove a file");
+                }
+            };
+        }
+    };
+}
 
 fn main() {
+    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
+
+    // Create the recordings dir incase it doesn't exist
+    create_dir(PATH);
+
+    // Empty the recordings dir
+    let recordings_dir = fs::read_dir(PATH);
+    delete_dir_contents(recordings_dir);
+
+    // Initialize recording boolean
     let recording = std::sync::Arc::new(RecordingStatus(std::sync::atomic::AtomicBool::new(false)));
     let recording_clone = recording.clone();
 
