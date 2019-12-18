@@ -13,6 +13,7 @@ use std::sync::Arc;
 use std::sync::atomic::{Ordering, AtomicBool, AtomicI32};
 
 const LATENCY_MS: f32 = 20.0;
+const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
 
 struct RecordingStatus {
     status: AtomicBool,
@@ -64,9 +65,9 @@ fn looper(recording: Arc<RecordingStatus>) -> Result<(), failure::Error> {
     event_loop.play_stream(output_stream_id.clone())?;
 
     // The WAV file we're recording to.
-    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/0.wav");
+    const FILEPATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/0.wav"); // TODO: Use the global PATH
     let spec = wav_spec_from_format(&format);
-    let writer = hound::WavWriter::create(PATH, spec)?;
+    let writer = hound::WavWriter::create(FILEPATH, spec)?;
     let writer = std::sync::Arc::new(std::sync::Mutex::new(Some(writer)));
     // let recording = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
     let writer_2 = writer.clone();
@@ -161,36 +162,32 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 // NOTE: Everything about this function seems inefficient
 #[get("/trigger")]
 fn trigger(recording: State<Arc<RecordingStatus>>) -> String {
-    let curr_status = recording.status.load(std::sync::atomic::Ordering::Relaxed);
-    let curr_count = recording.count.load(std::sync::atomic::Ordering::Relaxed);
-    let curr_recording_status = RecordingStatus {
-        status: AtomicBool::new(curr_status),
-        count: AtomicI32::new(curr_count),
-    };
+    let curr_status = recording.status.load(Ordering::Relaxed);
+    let curr_count = recording.count.load(Ordering::Relaxed);
 
-    let atomic_true = AtomicBool::new(true);
-    let atomic_false = AtomicBool::new(false);
-    let atomic_zero = AtomicI32::new(0);
+    println!("current status: {}", curr_status);
+    println!("current count: {}", curr_count);
 
-    println!("current status: {} {}", curr_status, curr_count);
-
-    let response = match curr_recording_status {
-        RecordingStatus { status: atomic_true, count: _ } => {
-            let new_status = !curr_status;
-            recording.status.store(new_status, Ordering::Relaxed);
+    let response = match curr_status {
+        true => {
+            recording.status.store(AtomicBool::new(false), Ordering::Relaxed);
             // TODO: stop recording
             "stop recording"
         },
-        RecordingStatus { status: atomic_false, count: atomic_zero } => {
-            let new_count = curr_count + 1;
-            recording.count.store(new_count, Ordering::Relaxed);
-            "start new recording"
+        false => {
+            match curr_count {
+                0 => {
+                    recording.status.store(AtomicBool::(true), Ordering::Relaxed);
+                    let new_count = curr_count + 1;
+                    recording.count.store(AtomicI32::(new_count), Ordering::Relaxed);
+                    "start new recording"
+                },
+                _ => {
+                    recording.count.store(AtomicI32::(0), Ordering::Relaxed);
+                    "delete recordings"
+                },
+            }
         },
-        RecordingStatus { status: atomic_false, count: _ } => {
-            let new_count = 0;
-            recording.count.store(new_count, Ordering::Relaxed);
-            "delete recording"
-        }
     };
 
     format!("{}", response)
@@ -223,7 +220,6 @@ fn delete_dir_contents(read_dir_res: Result<fs::ReadDir, Error>) {
 }
 
 fn main() {
-    const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
 
     // Create the recordings dir incase it doesn't exist
     create_dir(PATH);
@@ -233,9 +229,9 @@ fn main() {
     delete_dir_contents(recordings_dir);
 
     // Initialize recording boolean
-    let recording = std::sync::Arc::new(RecordingStatus{
-        status: std::sync::atomic::AtomicBool::new(false),
-        count: std::sync::atomic::AtomicI32::new(0),
+    let recording = Arc::new(RecordingStatus{
+        status: AtomicBool::new(false),
+        count: AtomicI32::new(0),
     });
     let recording_clone = recording.clone();
 
