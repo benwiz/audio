@@ -3,4 +3,6 @@ gui/public/
 gui/.nrepl-port
 gui/.shadow-cljs
 gui/.cpcache/
-target
+dsp/target/
+.DS_Store
+dsp/recordings/
