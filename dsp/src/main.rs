@@ -225,16 +225,12 @@ fn main() -> Result<(), failure::Error> {
         });
     });
 
-    let device = host.default_output_device().expect("failed to get default output device");
-    // let device = rodio::default_output_device().unwrap();
     let file = std::fs::File::open("example.wav").unwrap();
-    let beep1 = rodio::play_once(&device, BufReader::new(file)).unwrap();
+    let beep1 = rodio::play_once(&output_device, BufReader::new(file)).unwrap();
     beep1.set_volume(0.9);
-    println!("Started beep1");
-    std::thread::sleep(std::time::Duration::from_millis(3000));
 
     // Start a blocking http server
-    // server(app_state);
+    server(app_state);
 
     // Never returns
     Ok(())
