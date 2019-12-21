@@ -229,8 +229,11 @@ fn main() -> Result<(), failure::Error> {
     });
 
     let file = std::fs::File::open("example.wav").unwrap();
-    let beep1 = rodio::play_once(&output_device, BufReader::new(file)).unwrap();
-    beep1.set_volume(0.9);
+    let sink = rodio::Sink::new(&output_device);
+    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+    sink.append(source);
+    // let clip = rodio::play_once(&output_device, BufReader::new(file)).unwrap();
+    // clip.set_volume(0.9);
 
     // Start a blocking http server
     server(app_state);
