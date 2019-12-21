@@ -57,12 +57,15 @@ fn trigger(app_state: State<Arc<AppState>>) -> String {
         false => {
             match curr_count {
                 0 => {
+                    // TODO: Create new writer here, I think
                     app_state.status.store(true, Ordering::Relaxed);
                     let new_count = curr_count + 1;
                     app_state.count.store(new_count, Ordering::Relaxed);
                     "start new recording"
                 },
                 _ => {
+                    let recordings_dir = fs::read_dir(PATH);
+                    delete_dir_contents(recordings_dir);
                     app_state.count.store(0, Ordering::Relaxed);
                     "delete recordings"
                 },
@@ -154,7 +157,7 @@ fn main() -> Result<(), failure::Error> {
     // The WAV file we're recording to.
     const FILEPATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/0.wav"); // TODO: Use the global PATH
     let spec = wav_spec_from_format(&format);
-    let writer = hound::WavWriter::create(FILEPATH, spec)?;
+    let writer = hound::WavWriter::create(FILEPATH, spec)?; // TODO: Need to create the writer (and file) on the trigger
 
     // Initialize app state
     let app_state = Arc::new(AppState {
