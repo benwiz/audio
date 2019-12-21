@@ -231,9 +231,9 @@ fn main() -> Result<(), failure::Error> {
     let file = std::fs::File::open("example.wav").unwrap();
     let sink = rodio::Sink::new(&output_device);
     let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+    source.repeat_infinite(); // TODO: Figure out how to actually get a source because Deoder isn't a source
     sink.append(source);
-    // let clip = rodio::play_once(&output_device, BufReader::new(file)).unwrap();
-    // clip.set_volume(0.9);
+    // sink.sleep_until_end();
 
     // Start a blocking http server
     server(app_state);
