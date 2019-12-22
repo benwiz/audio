@@ -156,9 +156,9 @@ fn main() -> Result<(), failure::Error> {
     event_loop.play_stream(output_stream_id.clone())?;
 
     // The WAV file we're recording to.
-    const FILEPATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings/0.wav"); // TODO: Use the global PATH
+    let filepath = PATH.to_owned() + "/0.wav";
     let spec = wav_spec_from_format(&format);
-    let writer = hound::WavWriter::create(FILEPATH, spec)?; // TODO: Need to create the writer (and file) on the trigger
+    let writer = hound::WavWriter::create(filepath, spec)?; // TODO: Need to create the writer (and file) on the trigger
 
     // Initialize app state
     let app_state = Arc::new(AppState {
