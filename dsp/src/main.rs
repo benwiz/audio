@@ -76,7 +76,7 @@ fn trigger(app_state: State<Arc<AppState>>) -> String {
                     // Create a new writer (this creates the new file; when I'm not always
                     //  deleting the one file, I'll want to create the new writer after
                     //  stopping the recording and take the filename from the curr_count)
-                    // TODO: Handle the repeated boilerplate code better
+                    // TODO: This is a ton of boilerplate code to create a writer, extract it into a function
                     let host = cpal::default_host();
                     let input_device = host.default_input_device().expect("failed to get default input device");
                     let mut format = input_device.default_input_format().expect("failed to get format from input device");
