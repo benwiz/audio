@@ -8,6 +8,9 @@
 ## To Do
 
 - Figure out logging, I am worried printing to stdout will cause slowdowns
+- Code cleanup
+  - Functionalize writer creation
+  - Split the huge main into smaller functions
 
 ## To Do Later
 
