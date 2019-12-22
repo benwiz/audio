@@ -5,4 +5,5 @@ gui/.shadow-cljs
 gui/.cpcache/
 dsp/target/
 .DS_Store
+.nrepl_port
 dsp/recordings/
