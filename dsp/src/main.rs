@@ -20,7 +20,6 @@ const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
 struct AppState {
     status: AtomicBool,
     count: AtomicI32,
-    // writer: Mutex<hound::WavWriter<std::io::BufWriter<std::fs::File>>>,
     writer: Mutex<std::option::Option<hound::WavWriter<std::io::BufWriter<std::fs::File>>>>,
 }
 
@@ -251,12 +250,11 @@ fn main() -> Result<(), failure::Error> {
     });
 
     // Play if file exists. Do this by looking at the state.count.
-    // TODO: first round works, stuff gets messed up after delete
-    let sink = rodio::Sink::new(&output_device);
+    let mut sink = rodio::Sink::new(&output_device);
     std::thread::spawn(move || {
         loop {
             let count = app_state_clone_2.count.load(Ordering::Relaxed);
-            println!("sink.len: {}, count: {}", sink.len(), count);
+            // println!("sink.len: {}, count: {}", sink.len(), count);
             match count {
                 0 => {
                     if sink.len() > 0 {
@@ -265,6 +263,9 @@ fn main() -> Result<(), failure::Error> {
                 },
                 _ => {
                     if sink.len() == 0 {
+                        // FIXME: I really don't like that I have to recreate the sink here.
+                        //        When I append to a stopped sink it will append but not play.
+                        sink = rodio::Sink::new(&output_device);
                         let file = std::fs::File::open(PATH.to_owned() + "/0.wav").unwrap();
                         let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
                         sink.append(source);

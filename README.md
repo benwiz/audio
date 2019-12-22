@@ -7,7 +7,7 @@
 
 ## To Do
 
-
+- Figure out logging, I am worried printing to stdout will cause slowdowns
 
 ## To Do Later
 
