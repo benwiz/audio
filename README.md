@@ -7,13 +7,7 @@
 
 ## To Do
 
-- playback loop (make this a part of main loop, for now)
-  - NOTE: start off using rodio because it provides a lot of nice options, only if it doesn't work nicely try to implement directly using Hount and CPAL (should not be too bad since I can look at Rodio source code)
-  - case
-    - not recording && recording.wav exists
-      - play recording.wav
-    - recording
-      - stop playback
+
 
 ## To Do Later
 

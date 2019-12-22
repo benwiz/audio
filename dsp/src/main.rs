@@ -229,11 +229,11 @@ fn main() -> Result<(), failure::Error> {
         });
     });
 
+    // Play if file exists
     let file = std::fs::File::open("example.wav").unwrap();
     let sink = rodio::Sink::new(&output_device);
     let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
-    sink.append(source);
-    // sink.sleep_until_end();
+    // sink.append(source); // temporarily shut off because it was annoying
 
     // Start a blocking http server
     server(app_state);
