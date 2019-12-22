@@ -239,6 +239,7 @@ fn main() -> Result<(), failure::Error> {
     });
 
     // Play if file exists. Do this by looking at the state.count.
+    // TODO: first roud works, stuff gets messed up after delete
     let sink = rodio::Sink::new(&output_device);
     std::thread::spawn(move || {
         loop {
