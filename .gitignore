@@ -1,5 +1,4 @@
 gui/node_modules/
-gui/public/
 gui/.nrepl-port
 gui/.shadow-cljs
 gui/.cpcache/
