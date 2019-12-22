@@ -72,7 +72,7 @@ fn trigger(app_state: State<Arc<AppState>>) -> String {
                     // Delete all recordings
                     let recordings_dir = fs::read_dir(PATH);
                     delete_dir_contents(recordings_dir);
-                    // Update conut to 0
+                    // Update count to 0
                     app_state.count.store(0, Ordering::Relaxed);
                     // Http response
                     "delete recordings"
@@ -239,7 +239,7 @@ fn main() -> Result<(), failure::Error> {
     });
 
     // Play if file exists. Do this by looking at the state.count.
-    // TODO: first roud works, stuff gets messed up after delete
+    // TODO: first round works, stuff gets messed up after delete
     let sink = rodio::Sink::new(&output_device);
     std::thread::spawn(move || {
         loop {
