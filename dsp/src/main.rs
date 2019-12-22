@@ -12,6 +12,7 @@ use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
 use rocket::State;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{Ordering, AtomicBool, AtomicI32};
+use rodio::Source;
 
 const LATENCY_MS: f32 = 20.0;
 const PATH: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/recordings");
@@ -230,8 +231,7 @@ fn main() -> Result<(), failure::Error> {
 
     let file = std::fs::File::open("example.wav").unwrap();
     let sink = rodio::Sink::new(&output_device);
-    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
-    source.repeat_infinite(); // TODO: Figure out how to actually get a source because Deoder isn't a source
+    let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
     sink.append(source);
     // sink.sleep_until_end();
 
