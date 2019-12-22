@@ -239,18 +239,23 @@ fn main() -> Result<(), failure::Error> {
     });
 
     // Play if file exists. Do this by looking at the state.count.
-    // FIXME: sticking this in a loop broke it, obviously bc i'm constantly trying to add more data to the sink, maybe
-    // or constantly stopping the sink
+    let sink = rodio::Sink::new(&output_device);
     std::thread::spawn(move || {
         loop {
-            let sink = rodio::Sink::new(&output_device);
             let count = app_state_clone_2.count.load(Ordering::Relaxed);
+            println!("sink.len: {}, count: {}", sink.len(), count);
             match count {
-                0 => sink.stop(),
+                0 => {
+                    if sink.len() > 0 {
+                        sink.stop();
+                    }
+                },
                 _ => {
-                    let file = std::fs::File::open(PATH.to_owned() + "/0.wav").unwrap();
-                    let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
-                    sink.append(source);
+                    if sink.len() == 0 {
+                        let file = std::fs::File::open(PATH.to_owned() + "/0.wav").unwrap();
+                        let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
+                        sink.append(source);
+                    }
                 },
             };
         }
