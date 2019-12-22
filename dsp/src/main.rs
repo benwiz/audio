@@ -9,7 +9,8 @@ use std::fs;
 use std::io::Error;
 use std::io::BufReader;
 use cpal::traits::{DeviceTrait, EventLoopTrait, HostTrait};
-use rocket::State;
+use rocket::{State, Response};
+use rocket::http::{Status, ContentType};
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{Ordering, AtomicBool, AtomicI32};
 use rodio::Source;
@@ -41,7 +42,7 @@ fn wav_spec_from_format(format: &cpal::Format) -> hound::WavSpec {
 }
 
 #[get("/trigger")]
-fn trigger(app_state: State<Arc<AppState>>) -> String {
+fn trigger(app_state: State<Arc<AppState>>) -> Response {
     let curr_status = app_state.status.load(Ordering::Relaxed);
     let curr_count = app_state.count.load(Ordering::Relaxed);
 
@@ -93,7 +94,11 @@ fn trigger(app_state: State<Arc<AppState>>) -> String {
     };
 
     // Http response
-    format!("{}", response)
+    // format!("{}", response)
+    let mut response = Response::new();
+    response.set_header(ContentType::JSON);
+    // TODO: Set response body
+    response
 }
 
 fn server(app_state: Arc<AppState>) {
