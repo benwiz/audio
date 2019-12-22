@@ -51,29 +51,37 @@ fn trigger(app_state: State<Arc<AppState>>) -> String {
 
     let response = match curr_status {
         true => {
+            // Stop recording
             app_state.status.store(false, Ordering::Relaxed);
+            // Finalize the wav file
             app_state.writer.lock().unwrap().take().unwrap().finalize().expect("Error finalizing writer"); // stop wav writer
+            // Increment count
+            app_state.count.store(curr_count + 1, Ordering::Relaxed);
+            // Http response
             "stop recording"
         },
         false => {
             match curr_count {
                 0 => {
-                    // TODO: Create new writer here, I think
+                    // Start recording
                     app_state.status.store(true, Ordering::Relaxed);
-                    let new_count = curr_count + 1;
-                    app_state.count.store(new_count, Ordering::Relaxed);
+                    // Http response
                     "start new recording"
                 },
                 _ => {
+                    // Delete all recordings
                     let recordings_dir = fs::read_dir(PATH);
                     delete_dir_contents(recordings_dir);
+                    // Update conut to 0
                     app_state.count.store(0, Ordering::Relaxed);
+                    // Http response
                     "delete recordings"
                 },
             }
         },
     };
 
+    // Http response
     format!("{}", response)
 }
 
@@ -156,9 +164,9 @@ fn main() -> Result<(), failure::Error> {
     event_loop.play_stream(output_stream_id.clone())?;
 
     // The WAV file we're recording to.
-    let filepath = PATH.to_owned() + "/0.wav";
     let spec = wav_spec_from_format(&format);
-    let writer = hound::WavWriter::create(filepath, spec)?; // TODO: Need to create the writer (and file) on the trigger
+    let filepath = PATH.to_owned() + "/0.wav"; // for now, always 0.wav
+    let writer = hound::WavWriter::create(filepath, spec)?;
 
     // Initialize app state
     let app_state = Arc::new(AppState {
@@ -167,6 +175,7 @@ fn main() -> Result<(), failure::Error> {
         writer: Mutex::new(Some(writer)),
     });
     let app_state_clone = app_state.clone();
+    let app_state_clone_2 = app_state.clone();
 
     // Run the event loop on a separate thread.
     std::thread::spawn(move || {
@@ -229,11 +238,23 @@ fn main() -> Result<(), failure::Error> {
         });
     });
 
-    // Play if file exists
-    let file = std::fs::File::open("example.wav").unwrap();
-    let sink = rodio::Sink::new(&output_device);
-    let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
-    // sink.append(source); // temporarily shut off because it was annoying
+    // Play if file exists. Do this by looking at the state.count.
+    // FIXME: sticking this in a loop broke it, obviously bc i'm constantly trying to add more data to the sink, maybe
+    // or constantly stopping the sink
+    std::thread::spawn(move || {
+        loop {
+            let sink = rodio::Sink::new(&output_device);
+            let count = app_state_clone_2.count.load(Ordering::Relaxed);
+            match count {
+                0 => sink.stop(),
+                _ => {
+                    let file = std::fs::File::open(PATH.to_owned() + "/0.wav").unwrap();
+                    let source = rodio::Decoder::new(BufReader::new(file)).unwrap().repeat_infinite();
+                    sink.append(source);
+                },
+            };
+        }
+    });
 
     // Start a blocking http server
     server(app_state);
