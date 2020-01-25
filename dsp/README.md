@@ -30,6 +30,6 @@ summary:
 
 ```sh
 wget https://github.com/Audio-Injector/stereo-and-zero/raw/master/audio.injector.scripts_0.1-1_all.deb
-sudo dpkg -i audio.intector.scripts_0.1-1_all.deb
+sudo dpkg -i audio.injector.scripts_0.1-1_all.deb
 audioInjector-setup.sh
 ```
