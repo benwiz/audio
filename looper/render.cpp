@@ -1,5 +1,3 @@
-// TODO hook up button (toggle states and have LED react to the 4 states, later I'll take audio actions on those states)
-
 #include <Bela.h>
 #include <cmath>
 
@@ -11,7 +9,51 @@ float gFrequency = 3.0;
 float gPhase;
 float gInverseSampleRate;
 
-int gOnOffPin = 0;
+int gOnOffLEDPin = 0;
+int gLooperLEDPin = 1;
+
+int gButton1Pin = 0;
+bool gButton1Status = false;
+
+void analog_fast_blink(BelaContext *context, unsigned int frameNum, unsigned int pin)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
+  analogWriteOnce(context, frameNum, pin, out);
+
+  // Update and wrap phase of sine tone
+  gPhase += 4.0f * (float)M_PI * gFrequency * gInverseSampleRate;
+  if (gPhase > M_PI) {
+    gPhase -= 2.0f * (float)M_PI;
+  }
+}
+
+void analog_slow_blink(BelaContext *context, unsigned int frameNum, unsigned int pin)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
+  analogWriteOnce(context, frameNum, pin, out);
+
+  // Update and wrap phase of sine tone
+  gPhase += 0.5f * (float)M_PI * gFrequency * gInverseSampleRate;
+  if (gPhase > M_PI) {
+    gPhase -= 2.0f * (float)M_PI;
+  }
+}
+
+void analog_always_on(BelaContext *context, unsigned int frameNum, unsigned int pin)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange;
+  analogWriteOnce(context, frameNum, pin, out);
+}
+
+void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int pin)
+{
+  float out = kMinimumAmplitude;
+  analogWriteOnce(context, frameNum, pin, out);
+}
+
+//
+// Event loop functions
+//
 
 bool setup(BelaContext *context, void *userData)
 {
@@ -22,49 +64,14 @@ bool setup(BelaContext *context, void *userData)
     return false;
   }
 
+  // Configs for modulating LED sine wave
   gInverseSampleRate = 1.0 / context->analogSampleRate;
   gPhase = 0.0;
 
-  // Set gOutputPin as output
-  pinMode(context, 0, gOnOffPin, OUTPUT);
+  // Set the mode of digital pins
+  pinMode(context, 0, gButton1Pin, INPUT);
 
   return true;
-}
-
-void analog_fast_blink(BelaContext *context, unsigned int n)
-{
-  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
-  analogWriteOnce(context, n, 0, out);
-
-  // Update and wrap phase of sine tone
-  gPhase += 4.0f * (float)M_PI * gFrequency * gInverseSampleRate;
-  if (gPhase > M_PI) {
-    gPhase -= 2.0f * (float)M_PI;
-  }
-}
-
-void analog_slow_blink(BelaContext *context, unsigned int n)
-{
-  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
-  analogWriteOnce(context, n, 0, out);
-
-  // Update and wrap phase of sine tone
-  gPhase += 0.5f * (float)M_PI * gFrequency * gInverseSampleRate;
-  if (gPhase > M_PI) {
-    gPhase -= 2.0f * (float)M_PI;
-  }
-}
-
-void analog_always_on(BelaContext *context, unsigned int n)
-{
-  float out = kMinimumAmplitude + kAmplitudeRange;
-  analogWriteOnce(context, n, 0, out);
-}
-
-void analog_always_off(BelaContext *context, unsigned int n)
-{
-  float out = kMinimumAmplitude;
-  analogWriteOnce(context, n, 0, out);
 }
 
 
@@ -72,16 +79,20 @@ void render(BelaContext *context, void *userData)
 {
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
-    analog_fast_blink(context, n);
-    // analog_slow_blink(context, n);
-    // analog_always_on(context, n);
-    // analog_always_off(context, n);
+    // Always keep pin on to show the system is on and running
+    analog_always_on(context, n, gOnOffLEDPin);
+
+    if (gButton1Status) {
+      analog_always_on(context, n, gLooperLEDPin);
+    } else {
+      analog_always_off(context, n, gLooperLEDPin);
+    }
   }
 
   // digital loop
-  for (unsigned int n = 0; n < context->digitalFrames; ++n) {
-    // Set gOutputPin to always on (TODO figure out if there if is a way to turn this on in setup)
-    digitalWrite(context, n, gOnOffPin, 1);
+  for (unsigned int n = 0; n < context->digitalFrames; n++) {
+    int button1 = digitalRead(context, 0, gButton1Pin);
+    gButton1Status = button1 == 0;
   }
 }
 
