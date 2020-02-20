@@ -72,10 +72,10 @@ void render(BelaContext *context, void *userData)
 {
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
-    // analog_fast_blink(context, n);
+    analog_fast_blink(context, n);
     // analog_slow_blink(context, n);
     // analog_always_on(context, n);
-    analog_always_off(context, n);
+    // analog_always_off(context, n);
   }
 
   // digital loop
