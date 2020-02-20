@@ -11,7 +11,7 @@ float gFrequency = 3.0;
 float gPhase;
 float gInverseSampleRate;
 
-int gOnOffPin = 0; // digital pin 0 - check the pin diagram in the IDE
+int gOnOffPin = 0;
 
 bool setup(BelaContext *context, void *userData)
 {
@@ -31,18 +31,23 @@ bool setup(BelaContext *context, void *userData)
   return true;
 }
 
+void fast_blink(BelaContext *context, unsigned int n)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
+  analogWriteOnce(context, n, 0, out);
+
+  // Update and wrap phase of sine tone
+  gPhase += 2.0f * (float)M_PI * gFrequency * gInverseSampleRate;
+  if (gPhase > M_PI) {
+    gPhase -= 2.0f * (float)M_PI;
+  }
+}
+
 void render(BelaContext *context, void *userData)
 {
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
-    float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
-    analogWriteOnce(context, n, 0, out);
-
-    // Update and wrap phase of sine tone
-    gPhase += 2.0f * (float)M_PI * gFrequency * gInverseSampleRate;
-    if (gPhase > M_PI) {
-      gPhase -= 2.0f * (float)M_PI;
-    }
+    fast_blink(context, n);
   }
 
   // digital loop
