@@ -1,4 +1,4 @@
-// TODO an LED just for on/off
+// TODO hook up button (toggle states and have LED react to the 4 states, later I'll take audio actions on those states)
 
 #include <Bela.h>
 #include <cmath>
