@@ -31,23 +31,51 @@ bool setup(BelaContext *context, void *userData)
   return true;
 }
 
-void fast_blink(BelaContext *context, unsigned int n)
+void analog_fast_blink(BelaContext *context, unsigned int n)
 {
   float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
   analogWriteOnce(context, n, 0, out);
 
   // Update and wrap phase of sine tone
-  gPhase += 2.0f * (float)M_PI * gFrequency * gInverseSampleRate;
+  gPhase += 4.0f * (float)M_PI * gFrequency * gInverseSampleRate;
   if (gPhase > M_PI) {
     gPhase -= 2.0f * (float)M_PI;
   }
 }
 
+void analog_slow_blink(BelaContext *context, unsigned int n)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange * 0.5f * (1.0f + sinf(gPhase));
+  analogWriteOnce(context, n, 0, out);
+
+  // Update and wrap phase of sine tone
+  gPhase += 0.5f * (float)M_PI * gFrequency * gInverseSampleRate;
+  if (gPhase > M_PI) {
+    gPhase -= 2.0f * (float)M_PI;
+  }
+}
+
+void analog_always_on(BelaContext *context, unsigned int n)
+{
+  float out = kMinimumAmplitude + kAmplitudeRange;
+  analogWriteOnce(context, n, 0, out);
+}
+
+void analog_always_off(BelaContext *context, unsigned int n)
+{
+  float out = kMinimumAmplitude;
+  analogWriteOnce(context, n, 0, out);
+}
+
+
 void render(BelaContext *context, void *userData)
 {
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
-    fast_blink(context, n);
+    // analog_fast_blink(context, n);
+    // analog_slow_blink(context, n);
+    // analog_always_on(context, n);
+    analog_always_off(context, n);
   }
 
   // digital loop
