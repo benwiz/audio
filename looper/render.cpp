@@ -61,8 +61,25 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 // TODO functional (?) click detector
 // detects if there was a click event
 // 0 = no click event, 1 = single click, 2 = double click, 3 = long click
-int click_detector()
+int click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
+  // If old status was not clicked (false) and new status is clicked (true),
+  // then toggle our loop1 status
+  if (oldStatus == false && newStatus == true) {
+    int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    int duration = currTimestamp - oldTimestamp;
+
+    // If the duration (delay between clicks) is greater than gButtonPressDelay, then we can count it as a click
+    if (duration > gButtonPressDelay) {
+      gLoop1Status = (gLoop1Status + 1) % 4;
+      gButton1PressTimestamp = currTimestamp;
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
 }
 
 //
@@ -108,18 +125,7 @@ void render(BelaContext *context, void *userData)
     int button1 = digitalRead(context, 0, gButton1Pin);
     bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
 
-    // If old status was not clicked (false) and new status is clicked (true),
-    // then toggle our loop1 status
-    if (gButton1Status == false && newButton1Status == true) {
-      int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-      int duration = currTimestamp - gButton1PressTimestamp;
-
-      // If the duration (delay between clicks) is greater than gButtonPressDelay, then we can count it as a click
-      if (duration > gButtonPressDelay) {
-        gLoop1Status = (gLoop1Status + 1) % 4;
-        gButton1PressTimestamp = currTimestamp;
-      }
-    }
+    click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
 
     // update button status
     gButton1Status = newButton1Status;
