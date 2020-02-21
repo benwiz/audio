@@ -4,6 +4,8 @@
 
 using namespace std::chrono;
 
+// TODO figure out how to add inline docs
+
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
 const float kAmplitudeRange = 1.0 - kMinimumAmplitude;
@@ -21,6 +23,11 @@ int gButton1Pin = 0;
 bool gButton1Status = false;
 int gButton1PressTimestamp = -1;
 int gLoop1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
+
+struct Click {
+  int type;
+  int timestamp;
+};
 
 void analog_fast_blink(BelaContext *context, unsigned int frameNum, unsigned int pin)
 {
@@ -58,10 +65,9 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
   analogWriteOnce(context, frameNum, pin, out);
 }
 
-// TODO functional (?) click detector
 // detects if there was a click event
 // 0 = no click event, 1 = single click, 2 = double click, 3 = long click
-int click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
+struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
   // If old status was not clicked (false) and new status is clicked (true),
   // then toggle our loop1 status
@@ -71,14 +77,12 @@ int click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 
     // If the duration (delay between clicks) is greater than gButtonPressDelay, then we can count it as a click
     if (duration > gButtonPressDelay) {
-      gLoop1Status = (gLoop1Status + 1) % 4;
-      gButton1PressTimestamp = currTimestamp;
-      return 1;
+      return {1, currTimestamp};
     } else {
-      return 0;
+      return {0, 0};
     }
   } else {
-    return 0;
+    return {0, 0};
   }
 }
 
@@ -122,13 +126,16 @@ void render(BelaContext *context, void *userData)
 
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
+    // TODO can I make a general button handler from this?
+    // button 1 handling
     int button1 = digitalRead(context, 0, gButton1Pin);
     bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
-
-    click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
-
-    // update button status
+    struct Click button1Click= click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
     gButton1Status = newButton1Status;
+    if (button1Click.type > 0) {
+      gLoop1Status = (gLoop1Status + 1) % 4;
+      gButton1PressTimestamp = button1Click.timestamp;
+    }
   }
 
   rt_printf("loop1 status: %d %d\n", gButton1PressTimestamp, gLoop1Status);
