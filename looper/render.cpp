@@ -73,6 +73,9 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 
 // detects if there was a click event (cannot handle long click while events are triggered on only depress)
 // 0 = no click event, 1 = single click, 2 = double click
+// FIXME currently, a double click will also trigger the event for a single click just beforehand.
+// I'm not sure how to prevent this without causing a delay in the action. I'm not okay with a delay or waiting for release event.
+// That being said, this solutions probably works just fine.
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
   int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -158,13 +161,24 @@ void render(BelaContext *context, void *userData)
     bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
     struct Click button1Click = click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
     gButton1Status = newButton1Status;
-    if (button1Click.type > 0) {
-      // switch (gBank1
-      gBank1Status = (gBank1Status + 1) % 4;
-      gButton1PressTimestamp = button1Click.timestamp;
+    switch (button1Click.type)
+    {
+      case 0:
+        break;
+      case 1:
+        if (gBank1Status == 3) {
+          gBank1Status = 2;
+        } else {
+          gBank1Status++;
+        }
+        gButton1PressTimestamp = button1Click.timestamp;
+        break;
+      case 2:
+        gBank1Status = 0;
+        gButton1PressTimestamp = button1Click.timestamp;
+        break;
     }
   }
-
   // rt_printf("bank1 status: %d %d\n", gButton1PressTimestamp, gBank1Status);
 }
 
