@@ -5,6 +5,7 @@
 
 using namespace std::chrono;
 
+// TODO turn button update into a fn
 // TODO record audio
 // TODO way better variable names
 
@@ -13,18 +14,18 @@ const float kMinimumAmplitude = (1.5 / 5.0);
 const float kAmplitudeRange = 1.0 - kMinimumAmplitude;
 
 float gFrequency = 3.0;
-float gPhase;
+float gPhase = 0.0;
 float gInverseSampleRate;
 
 int gOnOffLEDPin = 0;
-int gBank1LEDPin = 1;
 
 int gDebounceDelay = 80; // ms
 int gDoubleClickDelay = 500; // ms
 
-int gButton1Pin = 0;
-bool gButton1Status = false;
-int gButton1PressTimestamp = -1;
+int gBank1LEDPin = 1;
+int gBank1ButtonPin = 0;
+bool gBank1ButtonStatus = false;
+int gBank1ButtonPressTimestamp = -1;
 int gBank1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
 
 struct Click {
@@ -130,10 +131,9 @@ bool setup(BelaContext *context, void *userData)
 
   // Configs for modulating LED sine wave
   gInverseSampleRate = 1.0 / context->analogSampleRate;
-  gPhase = 0.0;
 
   // Set the mode of digital pins
-  pinMode(context, 0, gButton1Pin, INPUT);
+  pinMode(context, 0, gBank1ButtonPin, INPUT);
 
   return true;
 }
@@ -154,10 +154,10 @@ void render(BelaContext *context, void *userData)
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
     // TODO can I make a general button handler from this?
     // button 1 handling
-    int button1 = digitalRead(context, 0, gButton1Pin);
+    int button1 = digitalRead(context, 0, gBank1ButtonPin);
     bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
-    struct Click button1Click = click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
-    gButton1Status = newButton1Status;
+    struct Click button1Click = click_detector(gBank1ButtonStatus, newButton1Status, gBank1ButtonPressTimestamp);
+    gBank1ButtonStatus = newButton1Status;
     switch (button1Click.type)
     {
       case 0:
@@ -168,15 +168,15 @@ void render(BelaContext *context, void *userData)
         } else {
           gBank1Status++;
         }
-        gButton1PressTimestamp = button1Click.timestamp;
+        gBank1ButtonPressTimestamp = button1Click.timestamp;
         break;
       case 2:
         gBank1Status = 0;
-        gButton1PressTimestamp = button1Click.timestamp;
+        gBank1ButtonPressTimestamp = button1Click.timestamp;
         break;
     }
   }
-  // rt_printf("bank1 status: %d %d\n", gButton1PressTimestamp, gBank1Status);
+  // rt_printf("bank1 status: %d %d\n", gBank1ButtonPressTimestamp, gBank1Status);
 }
 
 void cleanup(BelaContext *context, void *userData)
