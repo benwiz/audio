@@ -6,7 +6,9 @@ using namespace std::chrono;
 
 // TODO figure out how to add inline docs
 // TODO debounce down and up
-// TODO need shortcut to itail logs somehow
+// TODO double click or long click to clear bank
+// TODO way better variable names
+// TODO record audio
 
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
@@ -88,6 +90,25 @@ struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
   }
 }
 
+void set_bank_led(BelaContext *context, int n, int bankLEDPin, int bankStatus)
+{
+  switch (bankStatus)
+    {
+    case 0: // not recording, empty buffer
+      analog_always_off(context, n, bankLEDPin);
+      break;
+    case 1: // recording, currently filling buffer
+      analog_always_on(context, n, bankLEDPin);
+      break;
+    case 2: // not recording, playing back full buffer
+      analog_fast_blink(context, n, bankLEDPin);
+      break;
+    case 3: // not recording, not playing back, full buffer
+      analog_slow_blink(context, n, bankLEDPin);
+      break;
+    }
+}
+
 //
 // Event loop functions
 //
@@ -119,21 +140,7 @@ void render(BelaContext *context, void *userData)
     // Always keep pin on to show the system is on and running
     analog_always_on(context, n, gOnOffLEDPin);
 
-    switch (gBank1Status)
-    {
-    case 0: // not recording, empty buffer
-      analog_always_off(context, n, gBank1LEDPin);
-      break;
-    case 1: // recording, currently filling buffer
-      analog_always_on(context, n, gBank1LEDPin);
-      break;
-    case 2: // not recording, playing back full buffer
-      analog_fast_blink(context, n, gBank1LEDPin);
-      break;
-    case 3: // not recording, not playing back, full buffer
-      analog_slow_blink(context, n, gBank1LEDPin);
-      break;
-    }
+    set_bank_led(context, n, gBank1LEDPin, gBank1Status);
   }
 
   // digital loop
