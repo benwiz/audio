@@ -4,11 +4,11 @@
 
 using namespace std::chrono;
 
-// TODO figure out how to add inline docs
 // TODO debounce down and up
 // TODO double click or long click to clear bank
-// TODO way better variable names
+// TODO correct cycle behavior after creating the secondary click above
 // TODO record audio
+// TODO way better variable names
 
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
@@ -21,7 +21,7 @@ float gInverseSampleRate;
 int gOnOffLEDPin = 0;
 int gBank1LEDPin = 1;
 
-int gButtonPressDelay = 100; // ms
+int gDebounceDelay = 100; // ms
 
 int gButton1Pin = 0;
 bool gButton1Status = false;
@@ -80,7 +80,7 @@ struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
     int duration = currTimestamp - oldTimestamp;
 
     // If the duration (delay between clicks) is greater than gButtonPressDelay, then we can count it as a click
-    if (duration > gButtonPressDelay) {
+    if (duration > gDebounceDelay) {
       return {1, currTimestamp};
     } else {
       return {0, 0};
@@ -140,6 +140,7 @@ void render(BelaContext *context, void *userData)
     // Always keep pin on to show the system is on and running
     analog_always_on(context, n, gOnOffLEDPin);
 
+    // Set bank led pin based on status
     set_bank_led(context, n, gBank1LEDPin, gBank1Status);
   }
 
