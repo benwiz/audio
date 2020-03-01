@@ -22,7 +22,8 @@ float gInverseSampleRate;
 int gOnOffLEDPin = 0;
 int gBank1LEDPin = 1;
 
-int gDebounceDelay = 100; // ms
+int gDebounceDelay = 80; // ms
+int gDoubleClickDelay = 500; // ms
 
 int gButton1Pin = 0;
 bool gButton1Status = false;
@@ -70,22 +71,28 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
   analogWriteOnce(context, frameNum, pin, out);
 }
 
-// detects if there was a click event
-// 0 = no click event, 1 = single click, 2 = double click, 3 = long click
+// detects if there was a click event (cannot handle long click while events are triggered on only depress)
+// 0 = no click event, 1 = single click, 2 = double click
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
   int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
   int duration = currTimestamp - oldTimestamp;
 
   if (duration > gDebounceDelay) {
-    // If old status was not clicked (false) and new status is clicked (true), then toggle status
+    // If depressed
     if (oldStatus == false && newStatus == true) {
-      return {1, currTimestamp};
+      if (duration < gDoubleClickDelay) {
+        rt_printf("double click\n");
+        return {2, currTimestamp};
+      } else {
+        rt_printf("single click\n");
+        return {1, currTimestamp};
+      }
     } else {
-      return {0, currTimestamp};
+      return {0, 0};
     }
   } else {
-    return {0, currTimestamp};
+    return {0, 0};
   }
 }
 
@@ -152,12 +159,13 @@ void render(BelaContext *context, void *userData)
     struct Click button1Click = click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
     gButton1Status = newButton1Status;
     if (button1Click.type > 0) {
+      // switch (gBank1
       gBank1Status = (gBank1Status + 1) % 4;
       gButton1PressTimestamp = button1Click.timestamp;
     }
   }
 
-  rt_printf("bank1 status: %d %d\n", gButton1PressTimestamp, gBank1Status);
+  // rt_printf("bank1 status: %d %d\n", gButton1PressTimestamp, gBank1Status);
 }
 
 void cleanup(BelaContext *context, void *userData)
