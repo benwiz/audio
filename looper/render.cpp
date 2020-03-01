@@ -5,9 +5,6 @@
 
 using namespace std::chrono;
 
-// TODO debounce down and up
-// TODO double click or long click to clear bank
-// TODO correct cycle behavior after creating the secondary click above
 // TODO record audio
 // TODO way better variable names
 
