@@ -5,6 +5,8 @@
 using namespace std::chrono;
 
 // TODO figure out how to add inline docs
+// TODO debounce down and up
+// TODO need shortcut to itail logs somehow
 
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
@@ -15,14 +17,14 @@ float gPhase;
 float gInverseSampleRate;
 
 int gOnOffLEDPin = 0;
-int gLooperLEDPin = 1;
+int gBank1LEDPin = 1;
 
 int gButtonPressDelay = 100; // ms
 
 int gButton1Pin = 0;
 bool gButton1Status = false;
 int gButton1PressTimestamp = -1;
-int gLoop1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
+int gBank1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
 
 struct Click {
   int type;
@@ -117,10 +119,20 @@ void render(BelaContext *context, void *userData)
     // Always keep pin on to show the system is on and running
     analog_always_on(context, n, gOnOffLEDPin);
 
-    if (gButton1Status) {
-      analog_always_on(context, n, gLooperLEDPin);
-    } else {
-      analog_always_off(context, n, gLooperLEDPin);
+    switch (gBank1Status)
+    {
+    case 0: // not recording, empty buffer
+      analog_always_off(context, n, gBank1LEDPin);
+      break;
+    case 1: // recording, currently filling buffer
+      analog_always_on(context, n, gBank1LEDPin);
+      break;
+    case 2: // not recording, playing back full buffer
+      analog_fast_blink(context, n, gBank1LEDPin);
+      break;
+    case 3: // not recording, not playing back, full buffer
+      analog_slow_blink(context, n, gBank1LEDPin);
+      break;
     }
   }
 
@@ -133,12 +145,12 @@ void render(BelaContext *context, void *userData)
     struct Click button1Click= click_detector(gButton1Status, newButton1Status, gButton1PressTimestamp);
     gButton1Status = newButton1Status;
     if (button1Click.type > 0) {
-      gLoop1Status = (gLoop1Status + 1) % 4;
+      gBank1Status = (gBank1Status + 1) % 4; // TODO create fn for correct status cycling
       gButton1PressTimestamp = button1Click.timestamp;
     }
   }
 
-  rt_printf("loop1 status: %d %d\n", gButton1PressTimestamp, gLoop1Status);
+  rt_printf("bank1 status: %d %d\n", gButton1PressTimestamp, gBank1Status);
 }
 
 void cleanup(BelaContext *context, void *userData)
