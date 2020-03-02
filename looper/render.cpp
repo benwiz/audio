@@ -83,10 +83,8 @@ struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
     // If depressed
     if (oldStatus == false && newStatus == true) {
       if (duration < gDoubleClickDelay) {
-        rt_printf("double click\n");
         return {2, currTimestamp};
       } else {
-        rt_printf("single click\n");
         return {1, currTimestamp};
       }
     } else {
@@ -116,6 +114,32 @@ void set_bank_led(BelaContext *context, int n, int bankLEDPin, int bankStatus)
     }
 }
 
+// First three args are named after their global counter parts. Expecting addr so the globals will be updated.
+void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int pin)
+{
+  int button = digitalRead(context, 0, pin);
+  bool newButtonStatus = button == 0; // 0 means depressed in the current configuration (depends which way the button is hooked up)
+  struct Click buttonClick = click_detector(gBankButtonStatus, newButtonStatus, gBankButtonPressTimestamp);
+  gBankButtonStatus = newButtonStatus;
+  switch (buttonClick.type)
+    {
+    case 0:
+      break;
+    case 1:
+      if (gBankStatus == 3) {
+        gBankStatus = 2;
+      } else {
+        gBankStatus++;
+      }
+      gBankButtonPressTimestamp = buttonClick.timestamp;
+      break;
+    case 2:
+      gBankStatus = 0;
+      gBankButtonPressTimestamp = buttonClick.timestamp;
+      break;
+    }
+}
+
 //
 // Event loop functions
 //
@@ -138,7 +162,6 @@ bool setup(BelaContext *context, void *userData)
   return true;
 }
 
-
 void render(BelaContext *context, void *userData)
 {
   // analog loop
@@ -152,29 +175,8 @@ void render(BelaContext *context, void *userData)
 
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
-    // TODO can I make a general button handler from this?
     // button 1 handling
-    int button1 = digitalRead(context, 0, gBank1ButtonPin);
-    bool newButton1Status = button1 == 0; // 0 means clicked in the current configuration (depends which way the button is hooked up)
-    struct Click button1Click = click_detector(gBank1ButtonStatus, newButton1Status, gBank1ButtonPressTimestamp);
-    gBank1ButtonStatus = newButton1Status;
-    switch (button1Click.type)
-    {
-      case 0:
-        break;
-      case 1:
-        if (gBank1Status == 3) {
-          gBank1Status = 2;
-        } else {
-          gBank1Status++;
-        }
-        gBank1ButtonPressTimestamp = button1Click.timestamp;
-        break;
-      case 2:
-        gBank1Status = 0;
-        gBank1ButtonPressTimestamp = button1Click.timestamp;
-        break;
-    }
+    handle_button_event(context, gBank1ButtonStatus, gBank1Status, gBank1ButtonPressTimestamp, gBank1ButtonPin);
   }
   // rt_printf("bank1 status: %d %d\n", gBank1ButtonPressTimestamp, gBank1Status);
 }
