@@ -5,7 +5,6 @@
 
 using namespace std::chrono;
 
-// TODO turn button update into a fn
 // TODO record audio
 // TODO way better variable names
 
