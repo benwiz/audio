@@ -27,7 +27,8 @@ int gBank1ButtonPressTimestamp = -1;
 int gBank1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
 float gBank1Buffer_l[LOOP_BUFFER_SIZE] = {0};
 float gBank1Buffer_r[LOOP_BUFFER_SIZE] = {0};
-int gBank1BufWriterPtr = 0;
+int gBank1BufWritePtr = 0;
+int gBank1BufWritePtrMax = 0;
 
 struct Click {
   int type;
@@ -116,7 +117,7 @@ void set_bank_led(BelaContext *context, int n, int bankLEDPin, int bankStatus)
 }
 
 // First three args are named after their global counter parts. Expecting addr so the globals will be updated.
-void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int &gBankBufWritePtr, int pin)
+void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int &gBankBufWritePtr, int &gBankBufWritePtrMax, int pin)
 {
   int button = digitalRead(context, 0, pin);
   bool newButtonStatus = button == 0; // 0 means depressed in the current configuration (depends which way the button is hooked up)
@@ -133,8 +134,10 @@ void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBa
         gBankStatus++;
       }
       gBankButtonPressTimestamp = buttonClick.timestamp;
-      // If status is 1, new recording is about to start so make sure to reset pointer
-      if (gBankStatus == 1) {
+      // If status is 1, new recording is about to start so reset pointer
+      // If status is 2, recording is about to play mark max and so reset pointer
+      if (gBankStatus == 1 || gBankStatus == 2) {
+        gBankBufWritePtrMax = gBankBufWritePtr;
         gBankBufWritePtr = 0;
       }
       break;
@@ -176,16 +179,16 @@ void render(BelaContext *context, void *userData)
 
     switch (gBank1Status) {
     case 1:
-      if (LOOP_BUFFER_SIZE < gBank1BufWriterPtr) {
-        gBank1Buffer_l[gBank1BufWriterPtr] = out_l;
-        gBank1Buffer_r[gBank1BufWriterPtr] = out_r;
+      if (LOOP_BUFFER_SIZE < gBank1BufWritePtr) {
+        gBank1Buffer_l[gBank1BufWritePtr] = out_l;
+        gBank1Buffer_r[gBank1BufWritePtr] = out_r;
       }
-      gBank1BufWriterPtr++;
+      gBank1BufWritePtr++;
       break;
     case 2:
-      out_l += gBank1Buffer_l[gBank1BufWriterPtr];
-      out_r += gBank1Buffer_r[gBank1BufWriterPtr];
-      gBank1BufWriterPtr++;
+      out_l += gBank1Buffer_l[gBank1BufWritePtr];
+      out_r += gBank1Buffer_r[gBank1BufWritePtr];
+      gBank1BufWritePtr++;
       break;
     }
 
@@ -205,7 +208,7 @@ void render(BelaContext *context, void *userData)
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
     // button 1 handling
-    handle_button_event(context, gBank1ButtonStatus, gBank1Status, gBank1ButtonPressTimestamp, gBank1BufWriterPtr, gBank1ButtonPin);
+    handle_button_event(context, gBank1ButtonStatus, gBank1Status, gBank1ButtonPressTimestamp, gBank1BufWritePtr, gBank1BufWritePtrMax, gBank1ButtonPin);
   }
   // rt_printf("bank1 status: %d %d\n", gBank1ButtonPressTimestamp, gBank1Status);
 }
