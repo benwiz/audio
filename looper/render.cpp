@@ -7,9 +7,6 @@
 
 using namespace std::chrono;
 
-// TODO record audio
-// TODO way better variable names
-
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
 const float kAmplitudeRange = 1.0 - kMinimumAmplitude;
@@ -119,7 +116,7 @@ void set_bank_led(BelaContext *context, int n, int bankLEDPin, int bankStatus)
 }
 
 // First three args are named after their global counter parts. Expecting addr so the globals will be updated.
-void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int pin)
+void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int &gBankBufWritePtr, int pin)
 {
   int button = digitalRead(context, 0, pin);
   bool newButtonStatus = button == 0; // 0 means depressed in the current configuration (depends which way the button is hooked up)
@@ -136,6 +133,10 @@ void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBa
         gBankStatus++;
       }
       gBankButtonPressTimestamp = buttonClick.timestamp;
+      // If status is 1, new recording is about to start so make sure to reset pointer
+      if (gBankStatus == 1) {
+        gBankBufWritePtr = 0;
+      }
       break;
     case 2:
       gBankStatus = 0;
@@ -173,8 +174,20 @@ void render(BelaContext *context, void *userData)
     float out_l = audioRead(context, n, 0);
     float out_r = audioRead(context, n, 1);
 
-    gBank1Buffer_l[gBank1BufWriterPtr] = out_l;
-    gBank1Buffer_r[gBank1BufWriterPtr] = out_r;
+    switch (gBank1Status) {
+    case 1:
+      if (LOOP_BUFFER_SIZE < gBank1BufWriterPtr) {
+        gBank1Buffer_l[gBank1BufWriterPtr] = out_l;
+        gBank1Buffer_r[gBank1BufWriterPtr] = out_r;
+      }
+      gBank1BufWriterPtr++;
+      break;
+    case 2:
+      out_l += gBank1Buffer_l[gBank1BufWriterPtr];
+      out_r += gBank1Buffer_r[gBank1BufWriterPtr];
+      gBank1BufWriterPtr++;
+      break;
+    }
 
     audioWrite(context, n, 0, out_l);
     audioWrite(context, n, 1, out_r);
@@ -192,7 +205,7 @@ void render(BelaContext *context, void *userData)
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
     // button 1 handling
-    handle_button_event(context, gBank1ButtonStatus, gBank1Status, gBank1ButtonPressTimestamp, gBank1ButtonPin);
+    handle_button_event(context, gBank1ButtonStatus, gBank1Status, gBank1ButtonPressTimestamp, gBank1BufWriterPtr, gBank1ButtonPin);
   }
   // rt_printf("bank1 status: %d %d\n", gBank1ButtonPressTimestamp, gBank1Status);
 }
