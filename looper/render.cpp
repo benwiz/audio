@@ -3,6 +3,8 @@
 #include <cmath>
 #include <chrono>
 
+#define LOOP_BUFFER_SIZE 44100
+
 using namespace std::chrono;
 
 // TODO record audio
@@ -26,6 +28,9 @@ int gBank1ButtonPin = 0;
 bool gBank1ButtonStatus = false;
 int gBank1ButtonPressTimestamp = -1;
 int gBank1Status = 0; // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
+float gBank1Buffer_l[LOOP_BUFFER_SIZE] = {0};
+float gBank1Buffer_r[LOOP_BUFFER_SIZE] = {0};
+int gBank1BufWriterPtr = 0;
 
 struct Click {
   int type;
@@ -163,6 +168,18 @@ bool setup(BelaContext *context, void *userData)
 
 void render(BelaContext *context, void *userData)
 {
+  // audio loop
+  for (unsigned int n = 0; n < context->audioFrames; n++) {
+    float out_l = audioRead(context, n, 0);
+    float out_r = audioRead(context, n, 1);
+
+    gBank1Buffer_l[gBank1BufWriterPtr] = out_l;
+    gBank1Buffer_r[gBank1BufWriterPtr] = out_r;
+
+    audioWrite(context, n, 0, out_l);
+    audioWrite(context, n, 1, out_r);
+  }
+
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
     // Always keep pin on to show the system is on and running
