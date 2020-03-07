@@ -70,7 +70,7 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 
 // detects if there was a click event (cannot handle long click while events are triggered on only depress)
 // 0 = no click event, 1 = single click, 2 = double click
-// FIXME currently, a double click will also trigger the event for a single click just beforehand.
+// NOTE currently, a double click will also trigger the event for a single click just beforehand.
 // I'm not sure how to prevent this without causing a delay in the action. I'm not okay with a delay or waiting for release event.
 // That being said, this solutions probably works just fine.
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
