@@ -1,5 +1,19 @@
 # guitar-looper
 
+## What
+
+Record and loop live audio in realtime.
+
+## Why
+
+To learn rust and create a looper to ues with my guitar.
+
+## Status
+
+Progress halted because of challenges with realtime audio io on raspberry pi. See [bela-dsp](../bela-dsp) for continuation.
+
+## How
+
 - dsp
   - a rust application that handles audio and exposes http api for controls
 - gui
@@ -11,8 +25,6 @@
 - Code cleanup
   - Functionalize writer creation
   - Split the huge main into smaller functions
-
-## To Do Later
 
 - Metronome
 - Metronome sync
