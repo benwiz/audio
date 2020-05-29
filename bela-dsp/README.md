@@ -14,3 +14,7 @@ Bela is a hat for Beaglebone board. It provides an api for capturing and writing
 ## Why
 
 Learn more about digital signal processing without starting from scratch. Primary goal is go build a guitar pedal that includes a looper.
+
+## Status
+
+Active development.
