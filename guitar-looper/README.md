@@ -12,6 +12,10 @@ To learn rust and create a looper to ues with my guitar.
 
 Progress halted because of challenges with realtime audio io on raspberry pi. See [bela-dsp](../bela-dsp) for continuation.
 
+### Retrospective
+
+Rust worked excellently, I would do it again but need more experience with the physical io.
+
 ## How
 
 - dsp
