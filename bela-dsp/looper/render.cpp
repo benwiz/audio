@@ -7,6 +7,8 @@
 
 using namespace std::chrono;
 
+int gLaunchTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+
 // Set range for analog outputs designed for driving LEDs
 const float kMinimumAmplitude = (1.5 / 5.0);
 const float kAmplitudeRange = 1.0 - kMinimumAmplitude;
@@ -79,6 +81,12 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
   int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+
+  // If it has been less than 1 second since launch, detect no press
+  if (currTimestamp - gLaunchTimestamp < 1000) {
+    return {0, 0};
+  }
+
   int duration = currTimestamp - oldTimestamp;
 
   if (duration > gDebounceDelay) {
@@ -131,8 +139,8 @@ void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBa
       if (gBankStatus == 3) { // if pending (3)
         gBankStatus = 2; // set to playing (2)
       } else {
-        // if stopped (0), set to recording (1),
-        // if recording (1), set to playing (2),
+        // if stopped (0), set to recording (1)
+        // if recording (1), set to playing (2)
         // if playing (2), set to pending (3)
         gBankStatus++;
       }
@@ -160,7 +168,6 @@ void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBa
 
 bool setup(BelaContext *context, void *userData)
 {
-
   // Check if analog channels are enabled
   if(context->analogFrames == 0 || context->analogFrames > context->audioFrames) {
     rt_printf("Error: this example needs analog enabled, with 4 or 8 channels\n");
@@ -183,7 +190,7 @@ void render(BelaContext *context, void *userData)
     float out_l = audioRead(context, n, 0);
     float out_r = audioRead(context, n, 1);
 
-    /* rt_printf("gBank1Status: %d\n", gBank1Status); */
+    // rt_printf("gBank1Status: %d\n", gBank1Status);
     switch (gBank1Status)
       {
       case 1: // recording
