@@ -120,29 +120,35 @@ void set_bank_led(BelaContext *context, int n, int bankLEDPin, int bankStatus)
 void handle_button_event(BelaContext *context, bool &gBankButtonStatus, int &gBankStatus, int &gBankButtonPressTimestamp, int &gBankBufWritePtr, int &gBankBufWritePtrMax, int pin)
 {
   int button = digitalRead(context, 0, pin);
-  bool newButtonStatus = button == 0; // 0 means depressed in the current configuration (depends which way the button is hooked up)
+  bool newButtonStatus = button == 1; // 1 means depressed in the current configuration (depends which way the button is hooked up) (yellow connected to gpio)
   struct Click buttonClick = click_detector(gBankButtonStatus, newButtonStatus, gBankButtonPressTimestamp);
   gBankButtonStatus = newButtonStatus;
   switch (buttonClick.type)
     {
-    case 0:
+    case 0: // no click event
       break;
-    case 1:
-      if (gBankStatus == 3) {
-        gBankStatus = 2;
+    case 1: // single click event
+      if (gBankStatus == 3) { // if pending (3)
+        gBankStatus = 2; // set to playing (2)
       } else {
+        // if stopped (0), set to recording (1),
+        // if recording (1), set to playing (2),
+        // if playing (2), set to pending (3)
         gBankStatus++;
       }
+      // mark last timestamp click event
       gBankButtonPressTimestamp = buttonClick.timestamp;
-      // If status is 1, new recording is about to start so reset pointer
-      // If status is 2, recording is about to play mark max and so reset pointer
+      // Now that status is updated
+      // If status is 1, to begin recording need to reset pointer
+      // If status is 2, to begin playing need to reset pointer
       if (gBankStatus == 1 || gBankStatus == 2) {
-        gBankBufWritePtrMax = gBankBufWritePtr;
+        // gBankBufWritePtrMax = gBankBufWritePtr; // I dont see any uses of the max value, though I get the point is for looping
         gBankBufWritePtr = 0;
       }
       break;
-    case 2:
+    case 2: // double click event
       gBankStatus = 0;
+      // mark last timestamp click event
       gBankButtonPressTimestamp = buttonClick.timestamp;
       break;
     }
@@ -177,21 +183,25 @@ void render(BelaContext *context, void *userData)
     float out_l = audioRead(context, n, 0);
     float out_r = audioRead(context, n, 1);
 
-    switch (gBank1Status) {
-    case 1:
-      if (LOOP_BUFFER_SIZE < gBank1BufWritePtr) {
-        gBank1Buffer_l[gBank1BufWritePtr] = out_l;
-        gBank1Buffer_r[gBank1BufWritePtr] = out_r;
+    /* rt_printf("gBank1Status: %d\n", gBank1Status); */
+    switch (gBank1Status)
+      {
+      case 1: // recording
+        // If the size has not been exceeded
+        if (gBank1BufWritePtr < LOOP_BUFFER_SIZE) {
+          gBank1Buffer_l[gBank1BufWritePtr] = out_l;
+          gBank1Buffer_r[gBank1BufWritePtr] = out_r;
+        }
+        gBank1BufWritePtr++;
+        break;
+      case 2: // playing
+        out_l += gBank1Buffer_l[gBank1BufWritePtr];
+        out_r += gBank1Buffer_r[gBank1BufWritePtr];
+        gBank1BufWritePtr++;
+        break;
       }
-      gBank1BufWritePtr++;
-      break;
-    case 2:
-      out_l += gBank1Buffer_l[gBank1BufWritePtr];
-      out_r += gBank1Buffer_r[gBank1BufWritePtr];
-      gBank1BufWritePtr++;
-      break;
-    }
 
+    // always pass through
     audioWrite(context, n, 0, out_l);
     audioWrite(context, n, 1, out_r);
   }
