@@ -35,7 +35,7 @@ float gBank1Buffer_r[LOOP_BUFFER_SIZE] = {0};
 int gBank1BufWritePtr = 0;
 int gBank1BufWritePtrMax = 0;
 int gBank1PotPin = 0; // analog in
-int gBank1Amplitude = 1;
+float gBank1Amplitude = 1.0;
 
 struct Click {
   int type;
@@ -195,7 +195,7 @@ bool setup(BelaContext *context, void *userData)
 
 void render(BelaContext *context, void *userData)
 {
-  rt_printf("status: %d\n", gBank1Status);
+  rt_printf("status: %d\tamplitude: %f\n", gBank1Status, gBank1Amplitude);
 
   // audio loop
   for (unsigned int n = 0; n < context->audioFrames; n++) {
@@ -215,8 +215,8 @@ void render(BelaContext *context, void *userData)
         break;
       case 2: // playing
         if (gBank1BufWritePtr < LOOP_BUFFER_SIZE) {
-          out_l += gBank1Buffer_l[gBank1BufWritePtr]; // * gBank1Amplitude;
-          out_r += gBank1Buffer_r[gBank1BufWritePtr]; // * gBank1Amplitude;
+          out_l += gBank1Buffer_l[gBank1BufWritePtr] * gBank1Amplitude;
+          out_r += gBank1Buffer_r[gBank1BufWritePtr] * gBank1Amplitude;
           gBank1BufWritePtr++;
         } else {
           gBank1BufWritePtr = 0;
@@ -237,8 +237,8 @@ void render(BelaContext *context, void *userData)
     // Set bank led pin based on status
     set_bank_led(context, n, gBank1LEDPin, gBank1Status);
 
-    // Set amplitude for bank 1
-    // gBank1Amplitude = analogRead(context, n/gAudioFramesPerAnalogFrame, gBank1PotPin);
+    // Set amplitude for bank 1 // TODO if the analog loop moves above the audio loop, this variable can be local to render
+    gBank1Amplitude = map(analogRead(context, n, gBank1PotPin), 0.0, 0.836, 0.0, 2.0);
   }
 
   // digital loop
