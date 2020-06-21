@@ -7,6 +7,8 @@
 
 using namespace std::chrono;
 
+// TODO do not share a global gPhase
+
 int gLaunchTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
 // Set range for analog outputs designed for driving LEDs
@@ -16,13 +18,14 @@ const float kAmplitudeRange = 1.0 - kMinimumAmplitude;
 float gFrequency = 3.0;
 float gPhase = 0.0;
 float gInverseSampleRate;
+int gAudioFramesPerAnalogFrame = 0;
 
 int gOnOffLEDPin = 0;
 
 int gDebounceDelay = 80; // ms
 int gDoubleClickDelay = 500; // ms
 
-int gBank1LEDPin = 1;
+int gBank1LEDPin = 1; // analog out
 int gBank1ButtonPin = 0;
 bool gBank1ButtonStatus = false;
 int gBank1ButtonPressTimestamp = -1;
@@ -31,6 +34,8 @@ float gBank1Buffer_l[LOOP_BUFFER_SIZE] = {0};
 float gBank1Buffer_r[LOOP_BUFFER_SIZE] = {0};
 int gBank1BufWritePtr = 0;
 int gBank1BufWritePtrMax = 0;
+int gBank1PotPin = 0; // analog in
+int gBank1Amplitude = 1;
 
 struct Click {
   int type;
@@ -76,8 +81,8 @@ void analog_always_off(BelaContext *context, unsigned int frameNum, unsigned int
 // detects if there was a click event (cannot handle long click while events are triggered on only depress)
 // 0 = no click event, 1 = single click, 2 = double click
 // NOTE currently, a double click will also trigger the event for a single click just beforehand.
-// I'm not sure how to prevent this without causing a delay in the action. I'm not okay with a delay or waiting for release event.
-// That being said, this solutions probably works just fine.
+// I'm not sure how to prevent this without causing a delay in the action. I'm not okay with a
+// delay or waiting for release event. That being said, this solutions probably works just fine.
 struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
 {
   int currTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -180,20 +185,27 @@ bool setup(BelaContext *context, void *userData)
   // Set the mode of digital pins
   pinMode(context, 0, gBank1ButtonPin, INPUT);
 
+  // Claculaet audioFrames per analog Frame
+  if(context->analogFrames) {
+    gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
+  }
+
   return true;
 }
 
 void render(BelaContext *context, void *userData)
 {
+  rt_printf("status: %d\n", gBank1Status);
+
   // audio loop
   for (unsigned int n = 0; n < context->audioFrames; n++) {
     float out_l = audioRead(context, n, 0);
     float out_r = audioRead(context, n, 1);
 
-    // rt_printf("gBank1Status: %d\n", gBank1Status);
     switch (gBank1Status)
       {
       case 1: // recording
+        // TODO can I tirgger "end of recording" if LOOP_BUFFER_SIZE exceeded
         // If the size has not been exceeded
         if (gBank1BufWritePtr < LOOP_BUFFER_SIZE) {
           gBank1Buffer_l[gBank1BufWritePtr] = out_l;
@@ -202,9 +214,13 @@ void render(BelaContext *context, void *userData)
         gBank1BufWritePtr++;
         break;
       case 2: // playing
-        out_l += gBank1Buffer_l[gBank1BufWritePtr];
-        out_r += gBank1Buffer_r[gBank1BufWritePtr];
-        gBank1BufWritePtr++;
+        if (gBank1BufWritePtr < LOOP_BUFFER_SIZE) {
+          out_l += gBank1Buffer_l[gBank1BufWritePtr]; // * gBank1Amplitude;
+          out_r += gBank1Buffer_r[gBank1BufWritePtr]; // * gBank1Amplitude;
+          gBank1BufWritePtr++;
+        } else {
+          gBank1BufWritePtr = 0;
+        }
         break;
       }
 
@@ -220,6 +236,9 @@ void render(BelaContext *context, void *userData)
 
     // Set bank led pin based on status
     set_bank_led(context, n, gBank1LEDPin, gBank1Status);
+
+    // Set amplitude for bank 1
+    // gBank1Amplitude = analogRead(context, n/gAudioFramesPerAnalogFrame, gBank1PotPin);
   }
 
   // digital loop
