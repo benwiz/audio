@@ -1,5 +1,3 @@
-// TODO put inside test project
-
 #include <Bela.h>
 #include <cmath>
 #include <chrono>
@@ -47,6 +45,8 @@ bool setup(BelaContext *context, void *userData)
   pinMode(context, 0, 4, OUTPUT);
   pinMode(context, 0, 5, OUTPUT);
   pinMode(context, 0, 8, OUTPUT);
+  pinMode(context, 0, 9, OUTPUT);
+  pinMode(context, 0, 11, OUTPUT);
 
   // Set pin mode for buttons
   pinMode(context, 0, 12, INPUT);
@@ -62,45 +62,37 @@ void render(BelaContext *context, void *userData)
   // audio loop
   for (unsigned int n = 0; n < context->audioFrames; n++) {
     // read audio
-    float out_l = audioRead(context, n, 0);
-    float out_r = audioRead(context, n, 1);
+    float out = audioRead(context, n, 0);
 
-    // Update phase
-
-
+    rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
     // Modify audio according to buttons
     if (BUTTON_A == 1) {
-      audioWrite(context, n, 0, 0.8f * sinf(gPhase));
-      audioWrite(context, n, 0, 0.8f * sinf(gPhase));
+      out = 0.5f * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 262.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
     }
     if (BUTTON_B == 1) {
-      audioWrite(context, n, 0, 0.8f * sinf(gPhase));
-      audioWrite(context, n, 0, 0.8f * sinf(gPhase));
+      out = 0.5f * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 330.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
     }
-    // if (BUTTON_C == 1) {
-    //   out_l += 0.8f * sinf(gPhase);
-    //   out_r += 0.8f * sinf(gPhase);
-    //   gPhase += 2.0f * (float)M_PI * 392.0 * gInverseSampleRate;
-    //   if (gPhase > M_PI)
-    //     gPhase -= 2.0f * (float)M_PI;
-    // }
-    // if (BUTTON_D == 1) {
-    //   out_l += 0.8f * sinf(gPhase);
-    //   out_r += 0.8f * sinf(gPhase);
-    //   gPhase += 2.0f * (float)M_PI * 523.0 * gInverseSampleRate;
-    //   if (gPhase > M_PI)
-    //     gPhase -= 2.0f * (float)M_PI;
-    // }
+    if (BUTTON_C == 1) {
+      out = 0.5f * sinf(gPhase);
+      gPhase += 2.0f * (float)M_PI * 392.0 * gInverseSampleRate;
+      if (gPhase > M_PI)
+        gPhase -= 2.0f * (float)M_PI;
+    }
+    if (BUTTON_D == 1) {
+      out = 0.5f * sinf(gPhase);
+      gPhase += 2.0f * (float)M_PI * 523.0 * gInverseSampleRate;
+      if (gPhase > M_PI)
+        gPhase -= 2.0f * (float)M_PI;
+    }
 
     // always pass through
-    audioWrite(context, n, 0, out_l);
-    audioWrite(context, n, 1, out_r);
+    audioWrite(context, n, 0, out);
   }
 
   // analog loop
@@ -119,14 +111,15 @@ void render(BelaContext *context, void *userData)
     digitalWriteOnce(context, n, 4, true);
     digitalWriteOnce(context, n, 5, true);
     digitalWriteOnce(context, n, 8, true);
+    digitalWriteOnce(context, n, 9, true);
+    digitalWriteOnce(context, n, 11, true);
 
     // read buttons
-    BUTTON_A = (digitalRead(context, 0, 12) - 1) * -1;
-    BUTTON_B = (digitalRead(context, 0, 13) - 1) * -1;
-    // BUTTON_C = (digitalRead(context, 0, 14) - 1) * -1;
-    // BUTTON_D = (digitalRead(context, 0, 15) - 1) * -1;
+    BUTTON_A = (digitalRead(context, 0, 15) - 1) * -1;
+    BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1;
+    BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1;
+    BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1;
   }
-  rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
 }
 
 void cleanup(BelaContext *context, void *userData)
