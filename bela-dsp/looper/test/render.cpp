@@ -14,8 +14,19 @@ int BUTTON_B = 0;
 int BUTTON_C = 0;
 int BUTTON_D = 0;
 
+float POT_A = 0.5;
+float POT_B = 0.5;
+float POT_C = 0.5;
+float POT_D = 0.5;
+float POT_MAX = 0.837;
+
 float gInverseSampleRate = 1.0;
 float gPhase = 0.0;
+
+float normalizePot(float v)
+{
+  return map(v, 0.0, POT_MAX, 0.0, 1.0);
+}
 
 //
 // Event loop functions
@@ -64,28 +75,27 @@ void render(BelaContext *context, void *userData)
     // read audio
     float out = audioRead(context, n, 0);
 
-    rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
     // Modify audio according to buttons
     if (BUTTON_A == 1) {
-      out = 0.5f * sinf(gPhase);
+      out = POT_A * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 262.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
     }
     if (BUTTON_B == 1) {
-      out = 0.5f * sinf(gPhase);
+      out = POT_B * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 330.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
     }
     if (BUTTON_C == 1) {
-      out = 0.5f * sinf(gPhase);
+      out = POT_C * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 392.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
     }
     if (BUTTON_D == 1) {
-      out = 0.5f * sinf(gPhase);
+      out = POT_D * sinf(gPhase);
       gPhase += 2.0f * (float)M_PI * 523.0 * gInverseSampleRate;
       if (gPhase > M_PI)
         gPhase -= 2.0f * (float)M_PI;
@@ -99,6 +109,13 @@ void render(BelaContext *context, void *userData)
   for (unsigned int n = 0; n < context->analogFrames; n++) {
     // analog led always on
     analogWriteOnce(context, n, 0, 1.0);
+
+    // read and map pots
+    POT_A = normalizePot(analogRead(context, n, 0));
+    POT_B = normalizePot(analogRead(context, n, 1));
+    POT_C = normalizePot(analogRead(context, n, 2));
+    POT_D = normalizePot(analogRead(context, n, 3));
+    /* rt_printf("ABCD: %.2f %.2f %.2f %.2f\n", POT_A, POT_B, POT_C, POT_D); */
   }
 
   // digital loop
@@ -119,6 +136,7 @@ void render(BelaContext *context, void *userData)
     BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1;
     BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1;
     BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1;
+    /* rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D); */
   }
 }
 
