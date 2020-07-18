@@ -70,10 +70,16 @@ bool setup(BelaContext *context, void *userData)
 
 void render(BelaContext *context, void *userData)
 {
+  float totalNoise = 0.0;
+
   // audio loop
   for (unsigned int n = 0; n < context->audioFrames; n++) {
     // read audio
-    float out = audioRead(context, n, 0);
+    float in = audioRead(context, n, 0);
+    float out = in;
+
+    // Calulate noise very poorly
+    totalNoise += in;
 
     // Modify audio according to buttons
     if (BUTTON_A == 1) {
@@ -108,7 +114,7 @@ void render(BelaContext *context, void *userData)
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
     // analog led always on
-    analogWriteOnce(context, n, 0, 1.0);
+    analogWriteOnce(context, n, 0, constrain(fabs(totalNoise * 2.0), 0.0, 1.0)); // I have no idea if this is a somewhat valuable representation of input
 
     // read and map pots
     POT_A = normalizePot(analogRead(context, n, 0));
