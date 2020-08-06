@@ -146,9 +146,9 @@ void render(BelaContext *context, void *userData)
         // TODO can I tirgger "end of recording" if LOOP_BUFFER_SIZE exceeded
         // If the size has not been exceeded
         if (LOOPER_A_BUF_PTR < LOOP_BUFFER_SIZE) {
-          LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] = out;
+          LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] = in;
+          LOOPER_A_BUF_PTR++;
         }
-        LOOPER_A_BUF_PTR++;
         break;
       }
       case 2: // playing
@@ -164,7 +164,7 @@ void render(BelaContext *context, void *userData)
         break;
       }
 
-    // always pass through
+    // Output audio
     audioWrite(context, n, 0, out);
   }
 
