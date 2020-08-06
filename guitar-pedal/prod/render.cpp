@@ -12,7 +12,7 @@ float INVERSE_SAMPLE_RATE = 1.0;
 int DEBOUNCE_DELAY = 500; // ms
 int DOUBLE_CLICK_DELAY = 500; // ms
 
-// TODO create a button struct that contains: status, last_update_timestamp
+// TODO create a button struct that contains: status, last_update_timestamp. And a looper struct.
 
 // Button pins
 int BUTTON_A_PIN = 15;
@@ -154,7 +154,7 @@ void render(BelaContext *context, void *userData)
       case 2: // playing
         // If the size has not been exceeded
         if (LOOPER_A_BUF_PTR < LOOP_BUFFER_SIZE) {
-          out += LOOPER_A_BUFFER[LOOPER_A_BUF_PTR]; // TODO multiply by amplitude
+          out += LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] * POT_A;
           LOOPER_A_BUF_PTR++;
         }
         // Start over
@@ -230,7 +230,7 @@ void render(BelaContext *context, void *userData)
       }
       case 1: {
         int t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-        bool toggle = (t / 500) % 2 == 0;
+        bool toggle = (t / 500) % 2 == 0; // flash every 500 ms
         digitalWriteOnce(context, n, LED_A, toggle);
         break;
       }
