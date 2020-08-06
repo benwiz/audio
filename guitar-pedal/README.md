@@ -18,3 +18,10 @@ Learn more about digital signal processing without starting from scratch. Primar
 ## Status
 
 Active development.
+
+## To Do
+
+[x] on led
+[x] audio input led
+[ ] looper
+[ ] metronome
