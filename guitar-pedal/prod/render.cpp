@@ -2,7 +2,7 @@
 #include <cmath>
 #include <chrono>
 
-#define LOOP_BUFFER_SIZE 44100
+#define LOOP_BUFFER_SIZE 2646000
 
 using namespace std::chrono;
 
@@ -142,13 +142,17 @@ void render(BelaContext *context, void *userData)
 
     switch (LOOPER_A)
       {
+      case 0: { // off
+        // Reset buffer
+        LOOPER_A_BUF_PTR = 0;
+      }
       case 1: { // recording
-        // TODO can I tirgger "end of recording" if LOOP_BUFFER_SIZE exceeded
         // If the size has not been exceeded
         if (LOOPER_A_BUF_PTR < LOOP_BUFFER_SIZE) {
           LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] = in;
           LOOPER_A_BUF_PTR++;
         }
+        // TODO later, toggle the LOOP_A status to 2 which will start playback
         break;
       }
       case 2: // playing
@@ -167,6 +171,7 @@ void render(BelaContext *context, void *userData)
     // Output audio
     audioWrite(context, n, 0, out);
   }
+  rt_printf("%d\t%d\n\n", LOOPER_A, LOOPER_A_BUF_PTR);
 
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
