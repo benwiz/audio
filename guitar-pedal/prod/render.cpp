@@ -158,13 +158,13 @@ void render(BelaContext *context, void *userData)
       }
       case 2: // playing
         // If the size has not been exceeded
-        if (LOOPER_A_PTR < LOOPER_A_PTR_MAX) {
+        if (LOOPER_A_PTR <= LOOPER_A_PTR_MAX) {
           out += LOOPER_A_BUFFER[LOOPER_A_PTR] * POT_A;
           LOOPER_A_PTR++;
         }
         // Start over
         else {
-          LOOPER_A_PTR = 0;
+          LOOPER_A_PTR = 1; // I'm not sure why the ptr resets to 1 instead of 0, `case 0` sets 0.
         }
         break;
       }
