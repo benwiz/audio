@@ -30,7 +30,8 @@ int BUTTON_D = 0;
  // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
 int LOOPER_A = 0;
 int LOOPER_A_TIMESTAMP = -1;
-int LOOPER_A_BUF_PTR = 0;
+int LOOPER_A_PTR = 0;
+int LOOPER_A_PTR_MAX = 0;
 float LOOPER_A_BUFFER[LOOP_BUFFER_SIZE] = {0};
 
 // LEDs
@@ -144,26 +145,26 @@ void render(BelaContext *context, void *userData)
       {
       case 0: { // off
         // Reset buffer
-        LOOPER_A_BUF_PTR = 0;
+        LOOPER_A_PTR = 0;
       }
       case 1: { // recording
         // If the size has not been exceeded
-        if (LOOPER_A_BUF_PTR < LOOP_BUFFER_SIZE) {
-          LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] = in;
-          LOOPER_A_BUF_PTR++;
+        if (LOOPER_A_PTR < LOOP_BUFFER_SIZE) {
+          LOOPER_A_BUFFER[LOOPER_A_PTR] = in;
+          LOOPER_A_PTR++;
         }
         // TODO later, toggle the LOOP_A status to 2 which will start playback
         break;
       }
       case 2: // playing
         // If the size has not been exceeded
-        if (LOOPER_A_BUF_PTR < LOOP_BUFFER_SIZE) {
-          out += LOOPER_A_BUFFER[LOOPER_A_BUF_PTR] * POT_A;
-          LOOPER_A_BUF_PTR++;
+        if (LOOPER_A_PTR < LOOPER_A_PTR_MAX) {
+          out += LOOPER_A_BUFFER[LOOPER_A_PTR] * POT_A;
+          LOOPER_A_PTR++;
         }
         // Start over
         else {
-          LOOPER_A_BUF_PTR = 0;
+          LOOPER_A_PTR = 0;
         }
         break;
       }
@@ -171,7 +172,7 @@ void render(BelaContext *context, void *userData)
     // Output audio
     audioWrite(context, n, 0, out);
   }
-  rt_printf("%d\t%d\n\n", LOOPER_A, LOOPER_A_BUF_PTR);
+  rt_printf("%d\t%d\n\n", LOOPER_A, LOOPER_A_PTR);
 
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
@@ -206,9 +207,14 @@ void render(BelaContext *context, void *userData)
 
         // Now that status is updated,
         // If status is 1, to begin recording need to reset pointer
-        // If status is 2, to begin playing need to reset pointer
-        if (LOOPER_A == 1 || LOOPER_A == 2) {
-          LOOPER_A_BUF_PTR = 0;
+        if (LOOPER_A == 1) {
+          LOOPER_A_PTR = 0;
+        }
+        // If status is 2, need to mark the latest ptr value and reset
+        // to begin playing need to reset pointer until the latest value
+        if (LOOPER_A == 2) {
+          LOOPER_A_PTR_MAX = LOOPER_A_PTR;
+          LOOPER_A_PTR = 0;
         }
         break;
       }
