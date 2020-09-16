@@ -89,8 +89,9 @@ struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
   }
 }
 
-void audio_loop(int status, int &looper_ptr, float* buf, float pot_value, float in, float &out)
+float audio_loop(int status, int &looper_ptr, int &looper_ptr_max, float* buf, float pot_value, float in)
 {
+  float out = 0;
   switch (status)
     {
     case 0: { // off
@@ -108,7 +109,8 @@ void audio_loop(int status, int &looper_ptr, float* buf, float pot_value, float 
     }
     case 2: // playing
       // If the size has not been exceeded
-      if (looper_ptr <= LOOPER_A_PTR_MAX) {
+      // rt_printf("XXX: %d / %d\n", looper_ptr, looper_ptr_max);
+      if (looper_ptr <= looper_ptr_max) {
         out += buf[looper_ptr] * pot_value;
         looper_ptr++;
       }
@@ -118,13 +120,15 @@ void audio_loop(int status, int &looper_ptr, float* buf, float pot_value, float 
       }
       break;
     }
+  // rt_printf("out: %.2f\n", out);
+  return out;
 }
 
-void read_button(BelaContext *context, int pin, int &status, int &looper_status, int &looper_timestamp, int &looper_ptr, int &looper_ptr_max)
+void read_button(BelaContext *context, int pin, int &button_status, int &looper_status, int &looper_timestamp, int &looper_ptr, int &looper_ptr_max)
 {
   int button = (digitalRead(context, 0, pin) - 1) * -1;
-  Click button_click = click_detector(status, button, looper_timestamp);
-  status = button; // update global to new state
+  Click button_click = click_detector(button_status, button, looper_timestamp);
+  button_status = button; // update global to new state
   switch (button_click.type)
     {
     case 0: { // no click event
@@ -136,12 +140,13 @@ void read_button(BelaContext *context, int pin, int &status, int &looper_status,
 
       // Now that status is updated,
       // If status is 1, to begin recording need to reset pointer
-      if (status == 1) {
+      if (looper_status == 1) {
         looper_ptr = 0;
       }
       // If status is 2, need to mark the latest ptr value and reset
       // to begin playing need to reset pointer until the latest value
-      if (status == 2) {
+      if (looper_status == 2) {
+        rt_printf("looper_ptr max: %d\n", looper_ptr);
         looper_ptr_max = looper_ptr;
         looper_ptr = 0;
       }
@@ -149,7 +154,7 @@ void read_button(BelaContext *context, int pin, int &status, int &looper_status,
     }
     case 2: { // double click event
       // Shut off looper
-      status = 0;
+      looper_status = 0;
       // update last timestamp click event
       looper_timestamp = button_click.timestamp;
       break;
@@ -233,7 +238,9 @@ void render(BelaContext *context, void *userData)
     totalNoise += in;
 
     // Audio loops
-    audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_BUFFER, POT_A, in, out);
+    // rt_printf("BEFORE---- %d %d %f %f %f\n", LOOPER_A, LOOPER_A_PTR, POT_A, in, out);
+    out += audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_PTR_MAX, LOOPER_A_BUFFER, POT_A, in);
+    // rt_printf("AFTER----- %d %d %f %f %f\n", LOOPER_A, LOOPER_A_PTR, POT_A, in, out);
 
     // Output audio
     audioWrite(context, n, 0, out);
