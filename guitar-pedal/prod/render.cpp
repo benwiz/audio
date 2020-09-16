@@ -27,18 +27,24 @@ int BUTTON_C = 0;
 int BUTTON_D = 0;
 
 // Looper statuses (I don't like this not being part of a configurable abstraction but dealing with it)
- // 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
+// 0 = off, 1 = recording, 2 = playing, 3 = not playing back but has recording
 int LOOPER_A = 0;
 int LOOPER_A_TIMESTAMP = -1;
 int LOOPER_A_PTR = 0;
 int LOOPER_A_PTR_MAX = 0;
 float LOOPER_A_BUFFER[LOOP_BUFFER_SIZE] = {0};
 
+int LOOPER_B = 0;
+int LOOPER_B_TIMESTAMP = -1;
+int LOOPER_B_PTR = 0;
+int LOOPER_B_PTR_MAX = 0;
+float LOOPER_B_BUFFER[LOOP_BUFFER_SIZE] = {0};
+
 // LEDs
 int LED_A = 11;
-int lED_B = 10; // maybe wrong
-int LED_C = 9; // maybe wrong
-int LED_D = 8; // maybe wrong
+int LED_B = 9;
+int LED_C = 8;
+int LED_D = 5;
 
 // Defaults in range [0, 1]
 float POT_A = 0.5;
@@ -146,7 +152,6 @@ void read_button(BelaContext *context, int pin, int &button_status, int &looper_
       // If status is 2, need to mark the latest ptr value and reset
       // to begin playing need to reset pointer until the latest value
       if (looper_status == 2) {
-        rt_printf("looper_ptr max: %d\n", looper_ptr);
         looper_ptr_max = looper_ptr;
         looper_ptr = 0;
       }
@@ -162,22 +167,22 @@ void read_button(BelaContext *context, int pin, int &button_status, int &looper_
     }
 }
 
-void set_looper_led(BelaContext *context, int n, int pin, int status)
+void set_looper_led(BelaContext *context, int n, int pin, int looper_status)
 {
-  switch (LOOPER_A)
+  switch (looper_status)
     {
     case 0: {
-      digitalWriteOnce(context, n, LED_A, false);
+      digitalWriteOnce(context, n, pin, false);
       break;
     }
     case 1: {
       int t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
       bool toggle = (t / 500) % 2 == 0; // flash every 500 ms
-      digitalWriteOnce(context, n, LED_A, toggle);
+      digitalWriteOnce(context, n, pin, toggle);
       break;
     }
     case 2: {
-      digitalWriteOnce(context, n, LED_A, true);
+      digitalWriteOnce(context, n, pin, true);
       break;
     }
     }
@@ -238,9 +243,8 @@ void render(BelaContext *context, void *userData)
     totalNoise += in;
 
     // Audio loops
-    // rt_printf("BEFORE---- %d %d %f %f %f\n", LOOPER_A, LOOPER_A_PTR, POT_A, in, out);
     out += audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_PTR_MAX, LOOPER_A_BUFFER, POT_A, in);
-    // rt_printf("AFTER----- %d %d %f %f %f\n", LOOPER_A, LOOPER_A_PTR, POT_A, in, out);
+    out += audio_loop(LOOPER_B, LOOPER_B_PTR, LOOPER_B_PTR_MAX, LOOPER_B_BUFFER, POT_B, in);
 
     // Output audio
     audioWrite(context, n, 0, out);
@@ -266,14 +270,11 @@ void render(BelaContext *context, void *userData)
 
     // read buttons
     read_button(context, 15, BUTTON_A, LOOPER_A, LOOPER_A_TIMESTAMP, LOOPER_A_PTR, LOOPER_A_PTR_MAX);
-
-    // BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1;
-    // BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1;
-    // BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1;
-    // rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
+    read_button(context, 14, BUTTON_B, LOOPER_B, LOOPER_B_TIMESTAMP, LOOPER_B_PTR, LOOPER_B_PTR_MAX);
 
     // update LED_A to reflect LOOPER_A (status)
     set_looper_led(context, n, LED_A, LOOPER_A);
+    set_looper_led(context, n, LED_B, LOOPER_B);
   }
 }
 
