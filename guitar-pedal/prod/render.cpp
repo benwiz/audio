@@ -40,6 +40,18 @@ int LOOPER_B_PTR = 0;
 int LOOPER_B_PTR_MAX = 0;
 float LOOPER_B_BUFFER[LOOP_BUFFER_SIZE] = {0};
 
+int LOOPER_C = 0;
+int LOOPER_C_TIMESTAMP = -1;
+int LOOPER_C_PTR = 0;
+int LOOPER_C_PTR_MAX = 0;
+float LOOPER_C_BUFFER[LOOP_BUFFER_SIZE] = {0};
+
+int LOOPER_D = 0;
+int LOOPER_D_TIMESTAMP = -1;
+int LOOPER_D_PTR = 0;
+int LOOPER_D_PTR_MAX = 0;
+float LOOPER_D_BUFFER[LOOP_BUFFER_SIZE] = {0};
+
 // LEDs
 int LED_A = 11;
 int LED_B = 9;
@@ -245,6 +257,8 @@ void render(BelaContext *context, void *userData)
     // Audio loops
     out += audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_PTR_MAX, LOOPER_A_BUFFER, POT_A, in);
     out += audio_loop(LOOPER_B, LOOPER_B_PTR, LOOPER_B_PTR_MAX, LOOPER_B_BUFFER, POT_B, in);
+    out += audio_loop(LOOPER_C, LOOPER_C_PTR, LOOPER_C_PTR_MAX, LOOPER_C_BUFFER, POT_C, in);
+    out += audio_loop(LOOPER_D, LOOPER_D_PTR, LOOPER_D_PTR_MAX, LOOPER_D_BUFFER, POT_D, in);
 
     // Output audio
     audioWrite(context, n, 0, out);
@@ -269,12 +283,16 @@ void render(BelaContext *context, void *userData)
     digitalWriteOnce(context, n, 0, true);
 
     // read buttons
-    read_button(context, 15, BUTTON_A, LOOPER_A, LOOPER_A_TIMESTAMP, LOOPER_A_PTR, LOOPER_A_PTR_MAX);
-    read_button(context, 14, BUTTON_B, LOOPER_B, LOOPER_B_TIMESTAMP, LOOPER_B_PTR, LOOPER_B_PTR_MAX);
+    read_button(context, BUTTON_A_PIN, BUTTON_A, LOOPER_A, LOOPER_A_TIMESTAMP, LOOPER_A_PTR, LOOPER_A_PTR_MAX);
+    read_button(context, BUTTON_B_PIN, BUTTON_B, LOOPER_B, LOOPER_B_TIMESTAMP, LOOPER_B_PTR, LOOPER_B_PTR_MAX);
+    read_button(context, BUTTON_C_PIN, BUTTON_C, LOOPER_C, LOOPER_C_TIMESTAMP, LOOPER_C_PTR, LOOPER_C_PTR_MAX);
+    read_button(context, BUTTON_D_PIN, BUTTON_D, LOOPER_D, LOOPER_D_TIMESTAMP, LOOPER_D_PTR, LOOPER_D_PTR_MAX);
 
     // update LED_A to reflect LOOPER_A (status)
     set_looper_led(context, n, LED_A, LOOPER_A);
     set_looper_led(context, n, LED_B, LOOPER_B);
+    set_looper_led(context, n, LED_C, LOOPER_C);
+    set_looper_led(context, n, LED_D, LOOPER_D);
   }
 }
 
