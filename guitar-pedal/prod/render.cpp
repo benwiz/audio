@@ -36,6 +36,9 @@ float LOOPER_A_BUFFER[LOOP_BUFFER_SIZE] = {0};
 
 // LEDs
 int LED_A = 11;
+int lED_B = 10; // maybe wrong
+int LED_C = 9; // maybe wrong
+int LED_D = 8; // maybe wrong
 
 // Defaults in range [0, 1]
 float POT_A = 0.5;
@@ -117,6 +120,64 @@ void audio_loop(int status, int &looper_ptr, float* buf, float pot_value, float 
     }
 }
 
+void read_button(BelaContext *context, int pin, int &status, int &looper_status, int &looper_timestamp, int &looper_ptr, int &looper_ptr_max)
+{
+  int button = (digitalRead(context, 0, pin) - 1) * -1;
+  Click button_click = click_detector(status, button, looper_timestamp);
+  status = button; // update global to new state
+  switch (button_click.type)
+    {
+    case 0: { // no click event
+      break;
+    }
+    case 1: { // single click event
+      // increment looper status, cap at 2
+      looper_status = (looper_status + 1) % 3;
+
+      // Now that status is updated,
+      // If status is 1, to begin recording need to reset pointer
+      if (status == 1) {
+        looper_ptr = 0;
+      }
+      // If status is 2, need to mark the latest ptr value and reset
+      // to begin playing need to reset pointer until the latest value
+      if (status == 2) {
+        looper_ptr_max = looper_ptr;
+        looper_ptr = 0;
+      }
+      break;
+    }
+    case 2: { // double click event
+      // Shut off looper
+      status = 0;
+      // update last timestamp click event
+      looper_timestamp = button_click.timestamp;
+      break;
+    }
+    }
+}
+
+void set_looper_led(BelaContext *context, int n, int pin, int status)
+{
+  switch (LOOPER_A)
+    {
+    case 0: {
+      digitalWriteOnce(context, n, LED_A, false);
+      break;
+    }
+    case 1: {
+      int t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+      bool toggle = (t / 500) % 2 == 0; // flash every 500 ms
+      digitalWriteOnce(context, n, LED_A, toggle);
+      break;
+    }
+    case 2: {
+      digitalWriteOnce(context, n, LED_A, true);
+      break;
+    }
+    }
+}
+
 //
 // Event loop functions
 //
@@ -174,11 +235,9 @@ void render(BelaContext *context, void *userData)
     // Audio loops
     audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_BUFFER, POT_A, in, out);
 
-
     // Output audio
     audioWrite(context, n, 0, out);
   }
-  rt_printf("%d\t%d\n\n", LOOPER_A, LOOPER_A_PTR);
 
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
@@ -199,39 +258,7 @@ void render(BelaContext *context, void *userData)
     digitalWriteOnce(context, n, 0, true);
 
     // read buttons
-    int button_a = (digitalRead(context, 0, 15) - 1) * -1;
-    Click button_a_click = click_detector(BUTTON_A, button_a, LOOPER_A_TIMESTAMP);
-    BUTTON_A = button_a; // update global to new state
-    switch (button_a_click.type)
-      {
-      case 0: { // no click event
-        break;
-      }
-      case 1: { // single click event
-        // increment looper status, cap at 2
-        LOOPER_A = (LOOPER_A + 1) % 3;
-
-        // Now that status is updated,
-        // If status is 1, to begin recording need to reset pointer
-        if (LOOPER_A == 1) {
-          LOOPER_A_PTR = 0;
-        }
-        // If status is 2, need to mark the latest ptr value and reset
-        // to begin playing need to reset pointer until the latest value
-        if (LOOPER_A == 2) {
-          LOOPER_A_PTR_MAX = LOOPER_A_PTR;
-          LOOPER_A_PTR = 0;
-        }
-        break;
-      }
-      case 2: { // double click event
-        // Shut off looper
-        LOOPER_A = 0;
-        // update last timestamp click event
-        LOOPER_A_TIMESTAMP = button_a_click.timestamp;
-        break;
-      }
-      }
+    read_button(context, 15, BUTTON_A, LOOPER_A, LOOPER_A_TIMESTAMP, LOOPER_A_PTR, LOOPER_A_PTR_MAX);
 
     // BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1;
     // BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1;
@@ -239,28 +266,7 @@ void render(BelaContext *context, void *userData)
     // rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
 
     // update LED_A to reflect LOOPER_A (status)
-    switch (LOOPER_A)
-      {
-      case 0: {
-        digitalWriteOnce(context, n, LED_A, false);
-        break;
-      }
-      case 1: {
-        int t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-        bool toggle = (t / 500) % 2 == 0; // flash every 500 ms
-        digitalWriteOnce(context, n, LED_A, toggle);
-        break;
-      }
-      case 2: {
-        digitalWriteOnce(context, n, LED_A, true);
-        break;
-      }
-      }
-
-    // TODO off is off, recording is blinking, playback is on
-
-    // FIXME don't use PAUSED, just delete. it can be a feature for later. will need to stop handling double click.
-
+    set_looper_led(context, n, LED_A, LOOPER_A);
   }
 }
 
