@@ -86,6 +86,36 @@ struct Click click_detector(bool oldStatus, bool newStatus, int oldTimestamp)
   }
 }
 
+void audio_loop(int status, int &looper_ptr, float* buf, float pot_value, float in, float &out)
+{
+  switch (status)
+    {
+    case 0: { // off
+      // Reset buffer
+      looper_ptr = 0;
+    }
+    case 1: { // recording
+      // If the size has not been exceeded
+      if (looper_ptr < LOOP_BUFFER_SIZE) {
+        buf[looper_ptr] = in;
+        looper_ptr++;
+      }
+      // TODO later, toggle the status to 2 which will start playback
+      break;
+    }
+    case 2: // playing
+      // If the size has not been exceeded
+      if (looper_ptr <= LOOPER_A_PTR_MAX) {
+        out += buf[looper_ptr] * pot_value;
+        looper_ptr++;
+      }
+      // Start over
+      else {
+        looper_ptr = 1; // I'm not sure why the ptr resets to 1 instead of 0, `case 0` sets 0.
+      }
+      break;
+    }
+}
 
 //
 // Event loop functions
@@ -141,33 +171,9 @@ void render(BelaContext *context, void *userData)
     // Calulate noise, very poorly
     totalNoise += in;
 
-    switch (LOOPER_A)
-      {
-      case 0: { // off
-        // Reset buffer
-        LOOPER_A_PTR = 0;
-      }
-      case 1: { // recording
-        // If the size has not been exceeded
-        if (LOOPER_A_PTR < LOOP_BUFFER_SIZE) {
-          LOOPER_A_BUFFER[LOOPER_A_PTR] = in;
-          LOOPER_A_PTR++;
-        }
-        // TODO later, toggle the LOOP_A status to 2 which will start playback
-        break;
-      }
-      case 2: // playing
-        // If the size has not been exceeded
-        if (LOOPER_A_PTR <= LOOPER_A_PTR_MAX) {
-          out += LOOPER_A_BUFFER[LOOPER_A_PTR] * POT_A;
-          LOOPER_A_PTR++;
-        }
-        // Start over
-        else {
-          LOOPER_A_PTR = 1; // I'm not sure why the ptr resets to 1 instead of 0, `case 0` sets 0.
-        }
-        break;
-      }
+    // Audio loops
+    audio_loop(LOOPER_A, LOOPER_A_PTR, LOOPER_A_BUFFER, POT_A, in, out);
+
 
     // Output audio
     audioWrite(context, n, 0, out);
@@ -189,7 +195,7 @@ void render(BelaContext *context, void *userData)
 
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
-    // on/off pin always on
+    // on/off led pin always on
     digitalWriteOnce(context, n, 0, true);
 
     // read buttons
