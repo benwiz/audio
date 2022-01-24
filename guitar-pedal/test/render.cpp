@@ -34,6 +34,7 @@ float normalizePot(float v)
 
 bool setup(BelaContext *context, void *userData)
 {
+  rt_printf("Setup\n");
   // Check if analog channels are enabled
   if(context->analogFrames == 0 || context->analogFrames > context->audioFrames) {
     rt_printf("Error: this example needs analog enabled, with 4 or 8 channels\n");
@@ -71,6 +72,9 @@ bool setup(BelaContext *context, void *userData)
 void render(BelaContext *context, void *userData)
 {
   float totalNoise = 0.0;
+
+  // int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+  // rt_printf("start_time: %d, now: %d, mod: \n", START_TIME, now);
 
   // audio loop
   for (unsigned int n = 0; n < context->audioFrames; n++) {
@@ -114,7 +118,11 @@ void render(BelaContext *context, void *userData)
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
     // analog led always on
-    analogWriteOnce(context, n, 0, constrain(fabs(totalNoise * 2.0), 0.0, 1.0)); // I have no idea if this is a somewhat valuable representation of input
+    analogWriteOnce(context, n, 0,
+                    // 0.5
+                    // The following is a really rough visual estimator of input amplitude
+                    constrain(fabs(totalNoise * 2.0), 0.0, 1.0) // I have no idea if this is a somewhat valuable representation of input
+                    );
 
     // read and map pots
     POT_A = normalizePot(analogRead(context, n, 0));
@@ -126,23 +134,23 @@ void render(BelaContext *context, void *userData)
 
   // digital loop
   for (unsigned int n = 0; n < context->digitalFrames; n++) {
+    // read buttons
+    BUTTON_A = (digitalRead(context, 0, 15) - 1) * -1; // LED 11
+    BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1; // LED 9
+    BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1; // LED 8
+    BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1; // LED 5
+    // rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
+
     // digital led always on
     digitalWriteOnce(context, n, 0, true);
-    digitalWriteOnce(context, n, 1, true);
-    digitalWriteOnce(context, n, 2, true);
-    digitalWriteOnce(context, n, 3, true);
-    digitalWriteOnce(context, n, 4, true);
-    digitalWriteOnce(context, n, 5, true);
-    digitalWriteOnce(context, n, 8, true);
-    digitalWriteOnce(context, n, 9, true);
-    digitalWriteOnce(context, n, 11, true);
-
-    // read buttons
-    BUTTON_A = (digitalRead(context, 0, 15) - 1) * -1;
-    BUTTON_B = (digitalRead(context, 0, 14) - 1) * -1;
-    BUTTON_C = (digitalRead(context, 0, 13) - 1) * -1;
-    BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1;
-    /* rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D); */
+    digitalWriteOnce(context, n, 1, BUTTON_A == 1);
+    digitalWriteOnce(context, n, 2, BUTTON_B == 1);
+    digitalWriteOnce(context, n, 3, BUTTON_C == 1);
+    digitalWriteOnce(context, n, 4, BUTTON_D == 1);
+    digitalWriteOnce(context, n, 5, BUTTON_D == 1);
+    digitalWriteOnce(context, n, 8, BUTTON_C == 1);
+    digitalWriteOnce(context, n, 9, BUTTON_B == 1);
+    digitalWriteOnce(context, n, 11, BUTTON_A == 1);
   }
 }
 
