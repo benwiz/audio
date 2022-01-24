@@ -8,6 +8,7 @@ using namespace std::chrono;
 
 int START_TIME = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 int AUDIO_FRAMES_PER_ANALOG_FRAME = 1; // updated during setup
+int counter = 0;
 
 int BUTTON_A = 0;
 int BUTTON_B = 0;
@@ -71,6 +72,7 @@ bool setup(BelaContext *context, void *userData)
 
 void render(BelaContext *context, void *userData)
 {
+  counter++;
   float totalNoise = 0.0;
 
   // int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -117,6 +119,7 @@ void render(BelaContext *context, void *userData)
 
   // analog loop
   for (unsigned int n = 0; n < context->analogFrames; n++) {
+    // rt_printf("hola %d %d %.2f\n", counter, context->audioSampleRate, counter / context->audioSampleRate);
     // analog led always on
     analogWriteOnce(context, n, 0,
                     // 0.5
