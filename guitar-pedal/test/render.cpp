@@ -141,7 +141,7 @@ void render(BelaContext *context, void *userData)
     BUTTON_D = (digitalRead(context, 0, 12) - 1) * -1; // LED 5
     // rt_printf("ABCD: %d %d %d %d\n", BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_D);
 
-    // digital led always on
+    // digital leds
     digitalWriteOnce(context, n, 0, true);
     digitalWriteOnce(context, n, 1, BUTTON_A == 1);
     digitalWriteOnce(context, n, 2, BUTTON_B == 1);
