@@ -1,0 +1,14 @@
+#N canvas 254 160 267 260 16;
+#X floatatom 9 179 5 0 0 0 - - -, f 5;
+#X floatatom 9 241 5 0 0 0 - - -, f 5;
+#X obj 9 27 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 9 209 + 1;
+#X floatatom 65 179 5 0 0 0 - - -, f 5;
+#X text 5 4 this is a VSlider;
+#X text 18 159 these are numbers;
+#X text 45 210 this is a "+" object;
+#X connect 0 0 3 0;
+#X connect 2 0 0 0;
+#X connect 3 0 1 0;
+#X connect 4 0 3 1;
