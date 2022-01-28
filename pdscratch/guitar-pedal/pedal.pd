@@ -1,92 +1,92 @@
-#N canvas 960 96 960 984 12;
-#X obj 138 1297 key;
-#X obj 138 1328 sel 49;
-#X obj 251 1297 key;
-#X obj 368 1297 key;
-#X obj 480 1297 key;
-#X obj 251 1328 sel 50;
-#X obj 368 1328 sel 51;
-#X obj 480 1328 sel 52;
-#X obj 129 851 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
+#N canvas 950 96 960 984 12;
+#X obj 138 1348 key;
+#X obj 138 1379 sel 49;
+#X obj 251 1348 key;
+#X obj 368 1348 key;
+#X obj 480 1348 key;
+#X obj 251 1379 sel 50;
+#X obj 368 1379 sel 51;
+#X obj 480 1379 sel 52;
+#X obj 146 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 6000 1;
+#X floatatom 125 997 5 0 0 0 - - -;
+#X obj 241 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
-#X floatatom 129 993 5 0 0 0 - - -;
-#X obj 241 851 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
+#X floatatom 241 996 5 0 0 0 - - -;
+#X obj 357 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
-#X floatatom 241 993 5 0 0 0 - - -;
-#X obj 357 851 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
+#X floatatom 357 996 5 0 0 0 - - -;
+#X obj 489 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
-#X floatatom 357 993 5 0 0 0 - - -;
-#X obj 475 851 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
-#X floatatom 475 993 5 0 0 0 - - -;
-#X obj 138 1389 bng 15 250 50 0 empty BUTTON_A empty 17 7 0 10 -262144
+#X floatatom 489 996 5 0 0 0 - - -;
+#X obj 138 1440 bng 15 250 50 0 empty BUTTON_A empty 17 7 0 10 -262144
 -1 -1;
-#X symbolatom 138 1359 10 0 0 0 - - BUTTON_A;
-#X obj 251 1389 bng 15 250 50 0 empty BUTTON_B empty 17 7 0 10 -262144
+#X symbolatom 138 1410 10 0 0 0 - - BUTTON_A;
+#X obj 251 1440 bng 15 250 50 0 empty BUTTON_B empty 17 7 0 10 -262144
 -1 -1;
-#X symbolatom 251 1359 10 0 0 0 - - BUTTON_B;
-#X obj 368 1389 bng 15 250 50 0 empty BUTTON_C empty 17 7 0 10 -262144
+#X symbolatom 251 1410 10 0 0 0 - - BUTTON_B;
+#X obj 368 1440 bng 15 250 50 0 empty BUTTON_C empty 17 7 0 10 -262144
 -1 -1;
-#X symbolatom 368 1359 10 0 0 0 - - BUTTON_C;
-#X obj 480 1389 bng 15 250 50 0 empty BUTTON_D empty 17 7 0 10 -262144
+#X symbolatom 368 1410 10 0 0 0 - - BUTTON_C;
+#X obj 480 1440 bng 15 250 50 0 empty BUTTON_D empty 17 7 0 10 -262144
 -1 -1;
-#X symbolatom 480 1359 10 0 0 0 - - BUTTON_D;
-#X obj 127 1174 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
-1 1;
-#X obj 127 1112 tabread leds;
-#X floatatom 127 1082 5 0 9 0 - - -;
-#X obj 277 473 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X symbolatom 480 1410 10 0 0 0 - - BUTTON_D;
+#X obj 124 1259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X obj 124 1197 tabread leds;
+#X floatatom 124 1167 5 0 9 0 - - -;
+#X obj 271 424 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
-#X obj 127 1143 > 0.5;
-#X obj 239 1174 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
-1 1;
-#X obj 239 1112 tabread leds;
-#X floatatom 239 1082 5 0 9 0 - - -;
-#X obj 239 1143 > 0.5;
-#X obj 355 1174 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
-1 1;
-#X obj 355 1112 tabread leds;
-#X floatatom 355 1082 5 0 9 0 - - -;
-#X obj 355 1143 > 0.5;
-#X obj 473 1174 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
-1 1;
-#X obj 473 1112 tabread leds;
-#X floatatom 473 1082 5 0 9 0 - - -;
-#X obj 473 1143 > 0.5;
-#X obj 46 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 124 1228 > 0.5;
+#X obj 239 1259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X obj 239 1197 tabread leds;
+#X floatatom 239 1167 5 0 9 0 - - -;
+#X obj 239 1228 > 0.5;
+#X obj 357 1259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X obj 357 1197 tabread leds;
+#X floatatom 357 1167 5 0 9 0 - - -;
+#X obj 357 1228 > 0.5;
+#X obj 503 1259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X obj 503 1197 tabread leds;
+#X floatatom 503 1167 5 0 9 0 - - -;
+#X obj 503 1228 > 0.5;
+#X obj 45 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 46 615 tabread leds;
-#X floatatom 46 585 5 0 9 0 - - -;
-#X obj 46 646 > 0.5;
-#X obj 404 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 45 615 tabread leds;
+#X floatatom 45 585 5 0 9 0 - - -;
+#X obj 45 646 > 0.5;
+#X obj 404 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 404 615 tabread leds;
 #X floatatom 404 585 5 0 9 0 - - -;
 #X obj 404 646 > 0.5;
-#X obj 515 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 514 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 515 615 tabread leds;
-#X floatatom 515 585 5 0 9 0 - - -;
-#X obj 515 646 > 0.5;
-#X obj 630 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 514 615 tabread leds;
+#X floatatom 514 585 5 0 9 0 - - -;
+#X obj 514 646 > 0.5;
+#X obj 628 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 630 615 tabread leds;
-#X floatatom 630 585 5 0 9 0 - - -;
-#X obj 630 646 > 0.5;
-#X obj 736 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 628 615 tabread leds;
+#X floatatom 628 585 5 0 9 0 - - -;
+#X obj 628 646 > 0.5;
+#X obj 740 677 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 736 615 tabread leds;
-#X floatatom 736 585 5 0 9 0 - - -;
-#X obj 736 646 > 0.5;
-#X obj 148 615 tabread leds;
-#X floatatom 148 585 5 0 9 0 - - -;
-#X obj 148 679 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 9071 1;
-#X obj 148 646 * 100;
+#X obj 740 615 tabread leds;
+#X floatatom 740 585 5 0 9 0 - - -;
+#X obj 740 646 > 0.5;
+#X obj 146 615 tabread leds;
+#X floatatom 146 585 5 0 9 0 - - -;
+#X obj 146 710 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 4989 1;
+#X obj 146 646 * 100;
 #X text 44 826 POTS;
-#X text 35 1053 LEDs;
-#X text 44 1272 BUTTONS;
-#X text 30 525 LEDs;
+#X text 35 1096 LEDs;
+#X text 18 1347 BUTTONS;
+#X text 19 520 LEDs;
 #X obj 212 172 comment Currently I am using a button press \, but it
 would be better to track button down \, up \, and also run a debounce
 algorithm to detect button press;
@@ -95,7 +95,7 @@ algorithm to detect button press;
 array buttons float;
 #X obj 898 1528 set pedal-state leds pots buttons;
 #X obj 900 1592 print pedal-state;
-#X obj 277 499 metro 100;
+#X obj 271 450 metro 100;
 #X obj 1218 96 array define leds2;
 #X obj 1056 65 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
@@ -110,8 +110,8 @@ array buttons float;
 #X msg 1013 143 0 0 0 0 0 0 0 0 0 1;
 #X obj 1038 309 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X floatatom 1041 425 5 0 0 0 - - -;
-#X obj 995 473 array set leds2;
+#X floatatom 1041 424 5 0 0 0 - - -;
+#X obj 995 481 array set leds2;
 #X msg 995 399 1;
 #X obj 879 172 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
@@ -119,18 +119,80 @@ array buttons float;
 \, might be able to get rid of metronome when using array get if a
 change is sufficient. Some scratch work is at the right. Definitely
 possible but still probably need metro.;
-#X obj 73 1214 tabwrite leds_out;
-#X obj 220 1214 tabwrite leds_out;
-#X obj 355 1214 tabwrite leds_out;
-#X obj 501 1214 tabwrite leds_out;
+#X obj 73 1296 tabwrite leds_out;
+#X obj 220 1296 tabwrite leds_out;
+#X obj 357 1285 tabwrite leds_out;
+#X obj 503 1285 tabwrite leds_out;
 #X obj 212 233 comment Should I be using inlet and outlet? could that
 help me avoid using metro?;
-#X obj 337 707 tabwrite leds_out;
-#X obj 472 705 tabwrite leds_out;
-#X obj 607 705 tabwrite leds_out;
-#X obj 742 703 tabwrite leds_out;
+#X obj 337 719 tabwrite leds_out;
+#X obj 472 719 tabwrite leds_out;
+#X obj 607 719 tabwrite leds_out;
+#X obj 740 703 tabwrite leds_out;
 #X obj 8 719 tabwrite leds_out;
-#X obj 173 748 tabwrite leds_out;
+#X obj 192 779 tabwrite leds_out;
+#X obj 88 1053 tabwrite pots_out;
+#X msg 171 994 0;
+#X obj 88 1022 / 100;
+#X obj 216 1053 tabwrite pots_out;
+#X obj 216 1022 / 100;
+#X obj 357 1057 tabwrite pots_out;
+#X obj 357 1026 / 100;
+#X obj 489 1057 tabwrite pots_out;
+#X obj 489 1026 / 100;
+#X msg 286 994 1;
+#X msg 413 994 2;
+#X msg 570 994 3;
+#X floatatom 570 1025 5 0 0 0 - - -;
+#X floatatom 413 1025 5 0 0 0 - - -;
+#X floatatom 286 1025 5 0 0 0 - - -;
+#X floatatom 171 1025 5 0 0 0 - - -;
+#X obj 171 963 loadbang;
+#X obj 286 963 loadbang;
+#X obj 413 963 loadbang;
+#X obj 570 963 loadbang;
+#X msg 45 554 0;
+#X obj 356 450 loadbang;
+#X msg 124 1136 6;
+#X msg 239 1136 7;
+#X msg 357 1136 8;
+#X msg 503 1136 9;
+#X msg 146 554 1;
+#X msg 404 554 2;
+#X msg 514 554 3;
+#X msg 628 554 4;
+#X msg 740 554 5;
+#X obj 271 481 bang;
+#X obj 192 748 / 100;
+#X obj 146 677 clip 0 100;
+#X msg 174 1506 0;
+#X floatatom 174 1537 5 0 0 0 - - -;
+#X obj 174 1475 loadbang;
+#X msg 90 1531 1;
+#X obj 91 1565 tabwrite buttons_out;
+#X msg 41 1531 0;
+#X obj 25 1489 delay 250;
+#X floatatom 348 1653 5 0 0 0 - - -;
+#X obj 348 1591 loadbang;
+#X msg 264 1647 1;
+#X obj 265 1681 tabwrite buttons_out;
+#X msg 215 1647 0;
+#X obj 199 1605 delay 250;
+#X floatatom 428 1530 5 0 0 0 - - -;
+#X obj 428 1468 loadbang;
+#X msg 344 1524 1;
+#X obj 345 1558 tabwrite buttons_out;
+#X msg 295 1524 0;
+#X obj 279 1482 delay 250;
+#X floatatom 679 1521 5 0 0 0 - - -;
+#X obj 679 1459 loadbang;
+#X msg 595 1515 1;
+#X obj 596 1549 tabwrite buttons_out;
+#X msg 546 1515 0;
+#X obj 530 1473 delay 250;
+#X msg 348 1622 1;
+#X msg 428 1499 2;
+#X msg 679 1490 3;
 #X connect 0 0 1 0;
 #X connect 1 0 17 0;
 #X connect 2 0 5 0;
@@ -140,9 +202,21 @@ help me avoid using metro?;
 #X connect 6 0 21 0;
 #X connect 7 0 23 0;
 #X connect 8 0 9 0;
+#X connect 8 0 105 0;
 #X connect 10 0 11 0;
+#X connect 10 0 107 0;
 #X connect 12 0 13 0;
+#X connect 12 0 109 0;
 #X connect 14 0 15 0;
+#X connect 14 0 111 0;
+#X connect 16 0 140 0;
+#X connect 16 0 143 0;
+#X connect 18 0 149 0;
+#X connect 18 0 146 0;
+#X connect 20 0 155 0;
+#X connect 20 0 152 0;
+#X connect 22 0 161 0;
+#X connect 22 0 158 0;
 #X connect 24 0 92 0;
 #X connect 25 0 28 0;
 #X connect 26 0 25 0;
@@ -192,18 +266,9 @@ help me avoid using metro?;
 #X connect 61 0 64 0;
 #X connect 62 0 61 0;
 #X connect 62 0 102 1;
-#X connect 63 0 102 0;
-#X connect 64 0 63 0;
-#X connect 74 0 26 0;
-#X connect 74 0 31 0;
-#X connect 74 0 35 0;
-#X connect 74 0 39 0;
-#X connect 74 0 62 0;
-#X connect 74 0 43 0;
-#X connect 74 0 47 0;
-#X connect 74 0 51 0;
-#X connect 74 0 55 0;
-#X connect 74 0 59 0;
+#X connect 63 0 135 0;
+#X connect 64 0 136 0;
+#X connect 74 0 134 0;
 #X connect 76 0 75 0;
 #X connect 76 0 85 0;
 #X connect 76 0 83 0;
@@ -217,3 +282,66 @@ help me avoid using metro?;
 #X connect 87 0 88 1;
 #X connect 89 0 88 0;
 #X connect 90 0 81 0;
+#X connect 104 0 118 0;
+#X connect 105 0 103 0;
+#X connect 107 0 106 0;
+#X connect 109 0 108 0;
+#X connect 111 0 110 0;
+#X connect 112 0 117 0;
+#X connect 113 0 116 0;
+#X connect 114 0 115 0;
+#X connect 115 0 110 1;
+#X connect 116 0 108 1;
+#X connect 117 0 106 1;
+#X connect 118 0 103 1;
+#X connect 119 0 104 0;
+#X connect 120 0 112 0;
+#X connect 121 0 113 0;
+#X connect 122 0 114 0;
+#X connect 123 0 43 0;
+#X connect 124 0 134 0;
+#X connect 125 0 26 0;
+#X connect 126 0 31 0;
+#X connect 127 0 35 0;
+#X connect 128 0 39 0;
+#X connect 129 0 62 0;
+#X connect 130 0 47 0;
+#X connect 131 0 51 0;
+#X connect 132 0 55 0;
+#X connect 133 0 59 0;
+#X connect 134 0 125 0;
+#X connect 134 0 126 0;
+#X connect 134 0 127 0;
+#X connect 134 0 128 0;
+#X connect 134 0 123 0;
+#X connect 134 0 129 0;
+#X connect 134 0 130 0;
+#X connect 134 0 131 0;
+#X connect 134 0 132 0;
+#X connect 134 0 133 0;
+#X connect 135 0 102 0;
+#X connect 136 0 63 0;
+#X connect 137 0 138 0;
+#X connect 138 0 141 1;
+#X connect 139 0 137 0;
+#X connect 140 0 141 0;
+#X connect 142 0 141 0;
+#X connect 143 0 142 0;
+#X connect 144 0 147 1;
+#X connect 145 0 162 0;
+#X connect 146 0 147 0;
+#X connect 148 0 147 0;
+#X connect 149 0 148 0;
+#X connect 150 0 153 1;
+#X connect 151 0 163 0;
+#X connect 152 0 153 0;
+#X connect 154 0 153 0;
+#X connect 155 0 154 0;
+#X connect 156 0 159 1;
+#X connect 157 0 164 0;
+#X connect 158 0 159 0;
+#X connect 160 0 159 0;
+#X connect 161 0 160 0;
+#X connect 162 0 144 0;
+#X connect 163 0 150 0;
+#X connect 164 0 156 0;

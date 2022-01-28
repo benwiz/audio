@@ -1,19 +1,19 @@
-#N canvas 37 492 784 570 12;
+#N canvas 37 492 910 570 12;
 #X obj 12 10 hsl 200 15 20 5000 0 0 empty nota empty -2 -8 2 10 -262144
 -1 -1 0 1;
 #X obj 12 112 osc~;
-#X obj 12 194 dac~;
-#X obj 12 154 *~;
-#X obj 86 36 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
+#X obj 12 204 dac~;
+#X obj 12 158 *~;
+#X obj 86 51 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
-#X floatatom 83 66 5 0 0 0 - - -;
-#X floatatom 12 34 5 0 0 0 - - -;
-#X msg 239 37 \; pd dsp \$1;
-#X obj 239 9 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
-;
-#X obj 96 128 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X floatatom 83 92 5 0 0 0 - - -;
+#X floatatom 9 51 5 0 0 0 - - -;
+#X msg 239 51 \; pd dsp \$1;
+#X obj 239 10 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 96 195 tabwrite~ osciloscope;
+#X obj 83 137 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 83 224 tabwrite~ osciloscope;
 #N canvas 0 22 450 278 (subpatch) 0;
 #X array osciloscope 882 float 1;
 #A 0 0.0129165 0.0297457 0.0462619 0.0622898 0.0776627 0.0922167 0.105799
@@ -139,21 +139,31 @@
 0.162534 0.158559 0.152917 0.145664 0.136874 0.126646 0.11508 0.102303
 0.0884503;
 #X coords 0 1 881 -1 200 140 1;
-#X restore 21 235 graph;
-#X obj 96 154 metro 100;
-#X msg 116 127 bang;
-#X obj 443 36 pedal;
+#X restore 12 250 graph;
+#X obj 83 178 metro 100;
+#X msg 116 112 bang;
+#X obj 443 51 pedal;
 #N canvas 0 50 450 250 (subpatch) 0;
 #X array leds 10 float 3;
-#A 0 0.714289 0.0571513 0.321432 0.0714267 0.842852 0.128574 0.507141
-0.421428 -0.0642812 0.678565;
+#A 0 0.0285707 0.392859 0.0285707 0.0499994 0.0714281 0.078571 0.078571
+0.428571 0.414286 0.457143;
 #X coords 0 1 10 0 200 140 1 0 0;
-#X restore 439 101 graph;
+#X restore 439 112 graph;
 #N canvas 0 50 450 250 (subpatch) 0;
 #X array leds_out 10 float 3;
-#A 0 1 0 0.485719 0.550006 0.578578 0.60715 0.60715 0.60715 0 0;
+#A 0 0 0.392859 0 0 0 0 0 0 0 0;
 #X coords 0 1 10 0 200 140 1 0 0;
-#X restore 291 294 graph;
+#X restore 687 112 graph;
+#N canvas 0 50 450 250 (subpatch) 0;
+#X array pots_out 4 float 3;
+#A 0 0.472441 0 0 0;
+#X coords 0 1 4 0 200 140 1 0 0;
+#X restore 439 278 graph;
+#N canvas 0 50 450 250 (subpatch) 0;
+#X array buttons_out 4 float 3;
+#A 0 0.364286 0.385714 0.4 0.449999;
+#X coords 0 1 4 0 200 140 1 0 0;
+#X restore 687 278 graph;
 #X connect 0 0 6 0;
 #X connect 1 0 3 0;
 #X connect 3 0 2 1;
