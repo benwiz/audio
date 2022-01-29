@@ -8,16 +8,16 @@
 #X obj 368 1379 sel 51;
 #X obj 480 1379 sel 52;
 #X obj 146 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 9400 1;
+-1 -1 3900 1;
 #X floatatom 125 997 5 0 0 0 - - -;
 #X obj 241 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 1800 1;
+-1 -1 3900 1;
 #X floatatom 241 996 5 0 0 0 - - -;
 #X obj 357 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 11400 1;
+-1 -1 4300 1;
 #X floatatom 357 996 5 0 0 0 - - -;
 #X obj 489 854 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 4300 1;
+-1 -1 9400 1;
 #X floatatom 489 996 5 0 0 0 - - -;
 #X obj 138 1440 bng 15 250 50 0 empty BUTTON_A empty 17 7 0 10 -262144
 -1 -1;
@@ -35,7 +35,7 @@
 0 1;
 #X obj 124 1197 tabread leds;
 #X floatatom 124 1167 5 0 9 0 - - -;
-#X obj 271 424 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 271 424 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 124 1228 > 0.5;
 #X obj 239 1259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
