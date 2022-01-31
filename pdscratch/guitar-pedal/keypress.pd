@@ -1,4 +1,4 @@
-#N canvas 0 126 287 308 12;
+#N canvas 0 118 733 375 12;
 #X obj 25 43 key;
 #X obj 25 99 trigger bang bang;
 #X msg 101 132 stop;
@@ -10,6 +10,8 @@
 #X obj 28 251 outlet;
 #X obj 25 74 sel \$1;
 #X obj 185 64 sel \$1;
+#X obj 233 106 comment The trigger thing seems a little pointless \,
+I think it's just forcing the delay to start before the keypress;
 #X connect 0 0 9 0;
 #X connect 1 0 5 0;
 #X connect 1 1 2 0;
