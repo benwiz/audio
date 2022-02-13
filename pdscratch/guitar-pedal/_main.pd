@@ -220,6 +220,8 @@
 #X obj 1238 657 osc~ 330;
 #X obj 1240 731 dac~ 1 2;
 #X obj 1240 689 *~;
+#X obj 1207 551 dac~ 1 2;
+#X obj 1203 444 adc~ 1 2;
 #X connect 0 0 6 0;
 #X connect 1 0 3 0;
 #X connect 3 0 2 1;
@@ -279,3 +281,5 @@
 #X connect 66 0 69 1;
 #X connect 67 0 69 0;
 #X connect 69 0 68 0;
+#X connect 71 0 70 0;
+#X connect 71 1 70 1;
