@@ -194,14 +194,12 @@
 #X obj 316 338 print C;
 #X obj 463 338 print D;
 #X obj 32 275 sel 0 1;
-#X obj 1262 448 techno-world;
-#X obj 1263 504 dac~ 1 2;
 #X msg 93 465 650;
 #X msg 173 459 0.33;
 #X obj 767 639 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 767 589 loadbang;
-#X obj 769 532 s bela_setDigital;
+#X obj 770 539 s bela_setDigital;
 #X obj 769 452 loadbang;
 #X obj 763 677 s bela_digitalOut11;
 #X obj 766 707 s bela_digitalOut12;
@@ -210,12 +208,18 @@
 #X obj 768 802 s bela_digitalOut15;
 #X obj 972 585 phasor~ 0.5;
 #X obj 972 610 dac~ 3;
-#X msg 768 485 out 11 \, out 12 \, out 13 \, out 14 \, out 15 \, out
-16 \, out 19 \, out 20 \, out 22;
 #X obj 766 837 s bela_digitalOut16;
 #X obj 766 873 s bela_digitalOut19;
 #X obj 763 899 s bela_digitalOut20;
-#X obj 761 924 s bela_digitalOut22;
+#X obj 1043 665 r bela_digitalIn26;
+#X msg 768 485 out 11 \, out 12 \, out 13 \, out 14 \, out 15 \, out
+22 \, out 20 \, out 19 \, out 16 \, in 26 \, in 25 \, in 24 \, in 23
+;
+#X obj 1046 790 s bela_digitalOut22;
+#X obj 1048 718 == 0;
+#X obj 1238 657 osc~ 330;
+#X obj 1240 731 dac~ 1 2;
+#X obj 1240 689 *~;
 #X connect 0 0 6 0;
 #X connect 1 0 3 0;
 #X connect 3 0 2 1;
@@ -256,20 +260,22 @@
 #X connect 40 0 35 0;
 #X connect 41 0 30 0;
 #X connect 42 0 25 0;
-#X connect 47 0 48 0;
-#X connect 47 0 48 1;
-#X connect 49 0 0 0;
-#X connect 50 0 4 0;
-#X connect 51 0 56 0;
-#X connect 51 0 57 0;
-#X connect 51 0 59 0;
-#X connect 51 0 58 0;
-#X connect 51 0 55 0;
-#X connect 51 0 63 0;
-#X connect 51 0 66 0;
-#X connect 51 0 65 0;
-#X connect 51 0 64 0;
-#X connect 52 0 51 0;
-#X connect 54 0 62 0;
-#X connect 60 0 61 0;
-#X connect 62 0 53 0;
+#X connect 47 0 0 0;
+#X connect 48 0 4 0;
+#X connect 49 0 54 0;
+#X connect 49 0 55 0;
+#X connect 49 0 57 0;
+#X connect 49 0 56 0;
+#X connect 49 0 53 0;
+#X connect 49 0 60 0;
+#X connect 49 0 62 0;
+#X connect 49 0 61 0;
+#X connect 50 0 49 0;
+#X connect 52 0 64 0;
+#X connect 58 0 59 0;
+#X connect 63 0 66 0;
+#X connect 64 0 51 0;
+#X connect 66 0 65 0;
+#X connect 66 0 69 1;
+#X connect 67 0 69 0;
+#X connect 69 0 68 0;
